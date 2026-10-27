@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-27T13:28:49.202073+00:00",
+  "checked_at": "2026-10-27T19:58:54.625500+00:00",
   "mode": "local_contracts_no_llm",
   "passed": true,
   "checks": [
@@ -21,7 +21,7 @@
     }
   ],
   "hashes": {
-    "tasks.jsonl": "bbbdf39a50221e29add3ea55c806d6ec52f308eb0ff371eda559f15bf37cba39",
+    "tasks.jsonl": "787b2eb795b746fb15af9fa82adc676abb9b2c6c1c688b21ef00a180d88237c4",
     "data/opportunities.json": "864973d76364fb978c983b0c03eda36cc1a84ff9e3b3a0c500fa19b0e7b74a4a",
     "data/students.json": "fcc483e89d0689425c9e9dbb04db836e2c39ba6576e2c08093f386522afbffe4",
     "prompts/system.md": "fadfa49680e36c71afeab5a380644a83d706208810f45ea182e72953c26076b8",
@@ -31,7 +31,7 @@
     "app.py": "33bebfcdaec4ce528c8e9bed7957b9fd81504570529d7accaa203efba8cbe7c8",
     "mcp_server.py": "10d7937dfb7bcda1d76cb8fb87cd1ba06c55f02bbb869743dc9bee4f613dcb01",
     "finder/__init__.py": "b34fbc1b0d091860a43405b212fbf18fb80000b3abd188e5366aca7c8e7e58e8",
-    "finder/agent.py": "677459013220b9e185e4717d034f3c54607f5452d7434660d0c846d820508a2d",
+    "finder/agent.py": "fa6bef3000ee0cc6ca3ed24d47c53aca7ba5a03320bcdf42bba0611ee3d60645",
     "finder/catalog.py": "c2c07853acd738bd30cea106d6da5c601f6d0aba43582f2a0bdfa2b0da7a8a0d",
     "finder/harness.py": "f1a47e0b52aec147decb0cb3c113bdcf733a9ec9ac1195f23e718b5c845492ad",
     "finder/mcp_client.py": "ce207e4ccddd9654af581d3527e327bbaf441c7adbe20557d41e605b49d70324",
@@ -39,17 +39,18 @@
     "finder/provider.py": "59999582b5693fe825a5a2aa86289439ccce46439f21d8486b5e1adfd317db67",
     "finder/storage.py": "3551dfcf2a306f11f503806bbe756a9be5f7e9f0668b2224f642b714bb7280e4",
     "evals/__init__.py": "0f90d18377bc035d9a610c59cd6c18aae1d80aeed725226e8869d825aab68b14",
-    "evals/graders.py": "01a14904d807e00f4965a5dc55dbdb5fb7f098941ffb0ec569c85ce6edcfb810",
-    "evals/run.py": "a6a1d8870d0f67b635e517b798881a7c15ec3af90bd3b5ba47b876654ea4fbed",
-    "evals/security.py": "fe53e6ff3c0951a005729446a48fa262c052d058fc63612df9eb9a9a2645dca6",
+    "evals/graders.py": "93d54fbd22686aee751457f20617bfc7157212aa75402063e3433569bf7fa06a",
+    "evals/run.py": "7914722a7fb12758d8e174ca95404fdd2a4d3d52086c5ec5a0bf65770fab0a47",
+    "evals/security.py": "8e9cd7079e289778418636fb5adf14408f7abbaac99b42f2d2f0193c5b8e76a2",
     "scripts/generate_data.py": "3362aa6183099585bac69c162b5f270b9e14fec85f2e13a0b4d03411d32d0c3a",
-    "scripts/generate_tasks.py": "96768c0f3e2aadfab7e2b3b27c721f7d5c0af3aca530e404de389c2fca5128f2",
-    "scripts/readiness.py": "81189b47485713f0746ad1359f59e14d5d6a9d6ca242e92209b6c147b43b5f39",
+    "scripts/generate_tasks.py": "d75fb6915ca5a8e696df6d17f311d8b9aad5a5b42c68a9b0a414d685bba51b49",
+    "scripts/readiness.py": "c0fae2faa15e3539bad1120b975473fcce0a023ecd93d4f4cedc8571f51b2bab",
     "scripts/verify_local.py": "3820afc8a8cc4a1537509d3afbd7232fbc92a76e8a0b8a0143935c2b785b8806",
     "tests/test_approvals.py": "44bcef006585b837d70586cb47ee7151ca2cefc2cd91df42357b73c458e71a62",
     "tests/test_domain.py": "29b34e52d45a163a2cf71b3151e967ea174414466c5d666913d301006059a5b6",
-    "tests/test_graders.py": "b59c6a8845278c89355409cb98424708ca0e3c6fc2f3199320dc8666c91abcf3",
+    "tests/test_graders.py": "e42deb6ef219c3505cd09f2e61ed559b8d222b8cac752e80e8e51cae3e71ef88",
     "tests/test_provider.py": "ce656310fbd49dad12de865ac111cc364baf4258cc06e24b1f2020d633842faa",
-    "tests/test_runtime.py": "a8ad50a56c5c391e2db0aa265b6a9623028271b41c0e42f14df8d2a7d0cdbfc2"
+    "tests/test_runtime.py": "932c4d7c35651af5192b8de113f1012ae6a6c4d97f2e4d465818ac52e32ab899",
+    "tests/test_security_evidence.py": "e10c8fb1ba7faa965632b521eaeee14b705a09c3a54760852a82848c7ae86dfb"
   }
 }

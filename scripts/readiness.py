@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from evals.run import hashes, load_tasks  # noqa: E402
+from evals.security import verified_live_defence  # noqa: E402
 
 
 def main():
@@ -49,10 +50,7 @@ def main():
             complete.append(str(path.parent.relative_to(ROOT)))
     security_file = ROOT / "results/security_live/report.json"
     security = json.loads(security_file.read_text()) if security_file.exists() else {}
-    security_ok = (security.get("llm_used") is True and security.get("before", {}).get("attack_success") is True
-                   and security.get("after", {}).get("attack_success") is False
-                   and security.get("after", {}).get("stopped") == "completed"
-                   and security.get("benign_control", {}).get("saved_with_explicit_test_human_consent") is True)
+    security_ok = verified_live_defence(security, hashes())
     analysis_done = "PENDING_LIVE_EVALUATION" not in (ROOT / "docs/error_analysis.md").read_text(encoding="utf-8")
     report = {
         "local_contracts": {"passed": local_ok, "test_count": local_count, "evidence": "results/local/tests.xml"},

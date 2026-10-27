@@ -1,7 +1,7 @@
 {
   "local_contracts": {
     "passed": true,
-    "test_count": 57,
+    "test_count": 67,
     "evidence": "results/local/tests.xml"
   },
   "tools_and_mcp": "implemented; see real MCP integration tests and doctor output",

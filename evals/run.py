@@ -21,7 +21,7 @@ from finder.mcp_client import CatalogBridge
 from finder.models import Student
 from finder.provider import OpenRouter, ProviderError
 from finder.storage import DraftStore
-from evals.graders import grade
+from evals.graders import grade, SUPPORTED_GRADERS
 
 
 def load_tasks(path: Path):
@@ -30,6 +30,11 @@ def load_tasks(path: Path):
         raise ValueError("At least 15 unique task IDs are required")
     if any(not x["turns"] or not x.get("expect") for x in tasks):
         raise ValueError("Each task needs turns and golden assertions")
+    for task in tasks:
+        if not isinstance(task.get("prompt"), str) or task["prompt"] != task["turns"][0] or task.get("lang") not in {"ar", "en"}:
+            raise ValueError("Each task needs the course prompt/lang fields; prompt must be its first turn")
+        if not task.get("graders") or any(g.get("type") not in SUPPORTED_GRADERS for g in task["graders"]):
+            raise ValueError("Each task needs supported, executable course graders")
     return tasks
 
 
@@ -103,8 +108,8 @@ async def evaluate(args):
                                     manifest["rows"] = len(rows)
                                     write_manifest()
                                     print(f"{config} trial={trial + 1} {task['id']}: {'PASS' if row['passed'] else 'FAIL ' + row['failed_graders']}", flush=True)
-                                    if row["stopped"] == "provider_error":
-                                        raise ProviderError("Provider failure during evaluation. Partial results retained; rerun explicitly when service/quota recovers.")
+                                    if row["stopped"] in {"provider_error", "unexpected_provider_cost", "cost_budget"}:
+                                        raise ProviderError("Provider or cost-policy failure during evaluation. Partial results retained; rerun explicitly after resolving it.")
                                 finally:
                                     store.close()
             manifest["status"] = "complete"

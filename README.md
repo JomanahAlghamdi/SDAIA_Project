@@ -11,6 +11,8 @@ Start in Arabic: [START_HERE_AR.md](START_HERE_AR.md). Exact requirement evidenc
 
 Repository: [JomanahAlghamdi/SDAIA_Project](https://github.com/JomanahAlghamdi/SDAIA_Project). [Local CI](https://github.com/JomanahAlghamdi/SDAIA_Project/actions/workflows/checks.yml) runs tests, real MCP connectivity and the security replay on every push. A green local CI result does not establish live model evaluation readiness.
 
+Detailed Arabic submission review: [docs/FINAL_REVIEW_AR.md](docs/FINAL_REVIEW_AR.md).
+
 ## Problem
 
 Students need to compare placements across training type, specialization, city, attendance mode, duration and start dates. A vacancy that sounds relevant can still fail academic requirements or have an expired deadline. Internship Finder accepts a conversational request, retrieves candidates, inspects details and checks eligibility in code. It explains known mismatches and unknown information. The student can then review a local draft and explicitly approve saving it. A task is complete when the assistant returns grounded options or an honest no-match response, and an optional draft is saved only after approval. No application is sent to an employer.
@@ -101,6 +103,8 @@ Actual provider usage is logged separately. Preflight token checks are deliberat
 **Configurations:** A = base system instructions; B = the same instructions plus one instruction requiring an eligibility tool call before recommending suitability. Same tools, permissions, guards, data and selected model. The extra instruction does not weaken A's write controls.
 
 **Graders:** completion/JSON validity, exact allowed recommendation IDs, required tool calls, missing-field requests, search-filter preservation, eligibility failure evidence, SQLite draft counts and approval trace events. These graders measure selected behaviors; they do not exhaustively verify all prose or every possible attack. Inspect transcripts manually for explanation quality, false claims and root causes.
+
+Every task includes the course-standard `id`, `category`, `lang`, `prompt` and `graders` fields. The runner executes deterministic course `db` and `tool_called` graders, plus the stricter domain assertions in `expect`. It also supports `contains_any`, `not_contains` and `tool_not_called`. Database graders use read-only SQLite authorization. `turns` extends the format for follow-up tests; `prompt` is always the first turn. Use this repository's runner to preserve the synthetic profile, approval simulation and multi-turn state.
 
 | Config | Live pass rate | pass^k | Avg requests | Avg tokens |
 |---|---|---|---|---|

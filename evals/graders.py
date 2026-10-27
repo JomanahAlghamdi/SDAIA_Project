@@ -1,5 +1,43 @@
 from __future__ import annotations
 
+import sqlite3
+
+
+SUPPORTED_GRADERS = {"contains_any", "not_contains", "tool_called", "tool_not_called", "db"}
+
+
+def standard_grades(graders: list[dict], text: str, used: list[str], connection) -> list[dict]:
+    """Execute the course's deterministic grader contract with read-only SQL."""
+    digits = str.maketrans("٠١٢٣٤٥٦٧٨٩٬", "0123456789,")
+    normalize = lambda value: value.translate(digits).casefold()
+    rows = []
+    for index, spec in enumerate(graders):
+        kind = spec["type"]
+        if kind not in SUPPORTED_GRADERS:
+            raise ValueError("Unsupported grader: " + kind)
+        detail = ""
+        if kind in {"contains_any", "not_contains"}:
+            found = any(normalize(value) in normalize(text) for value in spec["values"])
+            passed = found if kind == "contains_any" else not found
+        elif kind in {"tool_called", "tool_not_called"}:
+            found = spec["name"] in used
+            passed = found if kind == "tool_called" else not found
+        else:
+            # Even an accidentally edited task cannot mutate evaluation evidence.
+            allowed = {sqlite3.SQLITE_SELECT, sqlite3.SQLITE_READ, sqlite3.SQLITE_FUNCTION}
+            connection.set_authorizer(lambda action, *_: sqlite3.SQLITE_OK if action in allowed else sqlite3.SQLITE_DENY)
+            try:
+                row = connection.execute(spec["sql"]).fetchone()
+                actual = row[0] if row else None
+                passed = str(actual) == str(spec["expect"])
+                detail = f"expected={spec['expect']}; actual={actual}"
+            except sqlite3.DatabaseError:
+                passed, detail = False, "Invalid or non-read-only grading query"
+            finally:
+                connection.set_authorizer(None)
+        rows.append({"grader": f"course_{index}_{kind}", "passed": passed, "detail": detail})
+    return rows
+
 
 def grade(task: dict, runs: list, harness) -> list[dict]:
     """Assertions inspect actual model outputs, traces and DB effects, not task wording."""
@@ -12,6 +50,8 @@ def grade(task: dict, runs: list, harness) -> list[dict]:
     expected = task["expect"]
     events = [e for run in runs for e in run.events]
     used = [e["tool"] for e in events if e["event"] == "tool_call"]
+    checks.extend(standard_grades(task.get("graders", []), final.model_dump_json() if final else "",
+                                  used, harness.store.connection))
     ids = set(final.opportunity_ids) if final else set()
     check("draft_count", harness.store.count(harness.student.id) == expected["draft_count"],
           f"expected={expected['draft_count']}; actual={harness.store.count(harness.student.id)}")

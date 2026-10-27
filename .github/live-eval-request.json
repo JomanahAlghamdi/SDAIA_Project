@@ -1,0 +1,5 @@
+{
+  "request": "compliance-review-2026-10-27",
+  "purpose": "Run actual A/B evaluation and live security if the OpenRouter repository secret is available.",
+  "synthetic_data_only": true
+}

@@ -56,7 +56,8 @@ async def test_budget_stops_before_side_effects(tmp_path):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("usage,cost,reason", [(99999, 0, "token_budget"), (10, 0.2, "cost_budget")])
+@pytest.mark.parametrize("usage,cost,reason", [(99999, 0, "token_budget"), (10, 0.2, "cost_budget"),
+                                              (10, 0.001, "unexpected_provider_cost")])
 async def test_excess_provider_meter_never_reaches_write(tmp_path, usage, cost, reason):
     class Metered:
         async def complete(self, *args):

@@ -121,6 +121,9 @@ class Agent:
             if run.cost_usd > self.limits.max_cost_usd:
                 run.stopped = "cost_budget"
                 break
+            if run.cost_usd > 0:
+                run.stopped = "unexpected_provider_cost"
+                break
             if run.prompt_tokens + run.completion_tokens > self.limits.max_total_tokens:
                 run.stopped = "token_budget"
                 break

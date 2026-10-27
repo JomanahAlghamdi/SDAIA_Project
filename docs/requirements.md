@@ -10,7 +10,7 @@ Authority: [official capstone requirements](https://github.com/SDAIAAcademy/agen
 | ≥1 exposed/consumed MCP tool | Search and details via separate `mcp_server.py`, `finder/mcp_client.py` | Real SDK initialization/list/call tests; `app.py doctor` |
 | Context file | `prompts/system.md` loaded per run; B extra instruction separate | Runtime and manifest hashes; no unused spec file |
 | Memory or retrieval | Structured profile, last search and bounded conversation pairs; catalog retrieval | Runtime tests, multi-turn live tasks ready |
-| Compaction or context budget | Last 12 complete pairs, cap on results, byte-based conservative token bound | `finder/agent.py`; budget/memory tests |
+| Compaction or context budget | Last 12 messages (6 complete user/assistant pairs), cap on results, byte-based conservative token bound | `finder/agent.py`; budget/memory tests |
 | Permission policy and human approval for a write | Read allowlist; exact-preview host callback; one-use content-bound approval; atomic SQLite commit | `tests/test_approvals.py`; interactive demo; no LLM-supplied approval field |
 | Step and cost budgets | 8 model calls/20 tool calls; token/cost meters and pre/post checks; verified-free routing | Meter tests, explicit stop reasons; live metering awaiting provider |
 | ≥15 eval tasks with automatic graders | 20 task objects; output/tool/constraint/DB/approval graders | `tasks.jsonl`, `evals/graders.py`; fixture coverage tests |

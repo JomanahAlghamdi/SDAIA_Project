@@ -5,10 +5,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 tasks = []
 def add(id, category, student, prompts, expect, language="en", profile_overrides=None, approve_ids=None):
+    turns = prompts if isinstance(prompts, list) else [prompts]
+    expected = {"draft_count": 0, **expect}
+    # Course-standard fields remain executable; domain assertions extend them.
+    graders = [{"type": "db", "sql": "SELECT count(*) FROM drafts", "expect": expected["draft_count"]}]
+    graders += [{"type": "tool_called", "name": name} for name in expected.get("tools", [])]
     tasks.append({"id": id, "category": category, "lang": language, "student": student,
-                  "as_of": "2026-10-27", "turns": prompts if isinstance(prompts, list) else [prompts],
+                  "prompt": turns[0], "graders": graders,
+                  "as_of": "2026-10-27", "turns": turns,
                   "profile_overrides": profile_overrides or {}, "approved_opportunity_ids": approve_ids or [],
-                  "expect": {"draft_count": 0, **expect}})
+                  "expect": expected})
 
 add("search-ar-data-riyadh", "search", "S001", "ابحث لي عن تدريب تعاوني في مجال البيانات بمدينة الرياض يناسب ملفي. لا تحفظ طلبًا.",
     {"any_ids": ["OP001", "OP030"], "only_ids": ["OP001", "OP030"], "tools": ["search_opportunities"], "last_search": {"field": "Data", "cities": ["Riyadh"]}}, "ar")

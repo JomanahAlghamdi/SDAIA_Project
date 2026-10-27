@@ -34,6 +34,8 @@ Actual local replay results are in `results/security_replay/report.json` and acc
 
 The unsafe behavior is available only in this isolated evaluation script; app.py does not import it or expose an unsafe mode. Never use it with real data. The live experiment can incur provider calls but uses a verified-free model.
 
+Security reports include source hashes, actual model identifiers, completion states, catalog-read evidence and guard events. Starting a new experiment invalidates any prior successful report. The readiness check rejects stale reports, provider failures, runs that never read the injection, and cases where the defended model never reached the approval guard. If the model resists the attack by itself, report that separately; it does not establish that the code guard stopped that particular live attempt.
+
 ## Governance and residual risks
 
 - Explain the synthetic nature, draft status and human oversight. A draft is not an employer submission or admission.
