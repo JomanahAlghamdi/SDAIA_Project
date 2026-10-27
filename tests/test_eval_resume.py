@@ -44,7 +44,7 @@ async def test_resume_retains_behavioral_failures_and_retries_only_interruption(
     args.resume = out
     assert await suite.evaluate(args) == 0
     complete = json.loads((out / "manifest.json").read_text())
-    assert complete["status"] == "complete" and complete["rows"] == 40
-    assert FakeProvider.total == 45  # 44 user turns across A/B plus one retained infrastructure interruption.
+    assert complete["status"] == "complete" and complete["rows"] == len(tasks) * 2
+    assert FakeProvider.total == 2 * sum(len(t["turns"]) for t in tasks) + 1
     assert len(complete["attempts"]) == 2 and len(complete["provider_interruptions"]) == 1
     assert (out / "summary.md").exists()

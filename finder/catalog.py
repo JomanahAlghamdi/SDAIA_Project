@@ -27,6 +27,8 @@ class Catalog:
         for item in self.items.values():
             if item.status != "open" or item.deadline < today or item.start_date < today:
                 continue
+            if criteria.major and criteria.major not in item.accepted_majors:
+                continue
             if criteria.field and item.field != criteria.field:
                 continue
             if criteria.cities and item.city not in criteria.cities:

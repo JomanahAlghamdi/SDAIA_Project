@@ -5,7 +5,7 @@ from datetime import date
 from mcp.server.fastmcp import FastMCP
 
 from finder.catalog import Catalog
-from finder.models import SearchArgs
+from finder.models import Major, SearchArgs
 
 server = FastMCP("Internship Finder catalog", log_level="ERROR")
 catalog = Catalog()
@@ -18,9 +18,10 @@ def clock():
 @server.tool()
 def search_opportunities(field: str | None = None, cities: list[str] | None = None,
                          kind: str | None = None, mode: str | None = None,
-                         duration_months: int | None = None, limit: int = 5, offset: int = 0) -> dict:
+                         duration_months: int | None = None, limit: int = 5, offset: int = 0,
+                         major: Major | None = None) -> dict:
     """Search synthetic open internships. Filters are exact; paginate with offset. Dates use the server clock."""
-    args = SearchArgs(field=field, cities=cities or [], kind=kind, mode=mode,
+    args = SearchArgs(major=major, field=field, cities=cities or [], kind=kind, mode=mode,
                       duration_months=duration_months, limit=limit, offset=offset)
     return catalog.search(args, clock())
 

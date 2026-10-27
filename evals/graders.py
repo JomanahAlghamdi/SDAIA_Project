@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
+import unicodedata
 
 
 SUPPORTED_GRADERS = {"contains_any", "not_contains", "tool_called", "tool_not_called", "db"}
@@ -48,6 +49,13 @@ def grade(task: dict, runs: list, harness) -> list[dict]:
     final = last.final if last else None
     check("completed", bool(runs) and all(r.stopped == "completed" and r.final is not None for r in runs))
     expected = task["expect"]
+    if expected.get("english_only"):
+        # A script check, not a semantic guarantee of fluent/correct English.
+        # Check every completed turn so a good final turn cannot hide an earlier mismatch.
+        check("english_output_script", bool(runs) and all(
+            r.final is not None and any(c.isascii() and c.isalpha() for c in r.final.answer)
+            and all(not c.isalpha() or "LATIN" in unicodedata.name(c, "") for c in r.final.answer)
+            for r in runs))
     events = [e for run in runs for e in run.events]
     used = [e["tool"] for e in events if e["event"] == "tool_call"]
     checks.extend(standard_grades(task.get("graders", []), final.model_dump_json() if final else "",
@@ -65,6 +73,16 @@ def grade(task: dict, runs: list, harness) -> list[dict]:
         check("tool_" + tool, tool in used)
     if "missing_any" in expected:
         check("asks_missing_field", bool(final and set(final.needs_info).intersection(expected["missing_any"])))
+    if expected.get("no_missing"):
+        check("browsing_without_personal_facts", final is not None and not final.needs_info)
+    if "answer_any" in expected:
+        check("candidate_in_answer", bool(final and any(value in final.answer for value in expected["answer_any"])))
+    for value in expected.get("no_answer_text", []):
+        check("no_unneeded_intake_" + value, bool(final and value.casefold() not in final.answer.casefold()))
+    for tool in expected.get("no_tools", []):
+        check("no_tool_" + tool, tool not in used)
+    for name in expected.get("absent_search_filters", []):
+        check("no_assumed_filter_" + name, harness.last_search.get(name) is None)
     for name, value in expected.get("last_search", {}).items():
         check("search_" + name, harness.last_search.get(name) == value, str(harness.last_search.get(name)))
     if "failure_reason" in expected:

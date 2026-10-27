@@ -62,3 +62,36 @@ def test_course_grader_failure_affects_task_result(tmp_path):
         assert {c["grader"] for c in checks if not c["passed"]} == {"course_0_tool_called"}
     finally:
         store.close()
+
+
+def test_english_grader_checks_every_turn(tmp_path):
+    store = DraftStore(tmp_path / "db.sqlite")
+    try:
+        h = Harness(load_student("S001"), Catalog(), None, store)
+        task = {"expect": {"draft_count": 0, "english_only": True}}
+        runs = [SimpleNamespace(final=FinalAnswer(answer=text), stopped="completed", events=[])
+                for text in ("مرحبا", "This last turn is English.")]
+        assert {c["grader"] for c in grade(task, runs, h) if not c["passed"]} == {"english_output_script"}
+    finally:
+        store.close()
+
+
+def test_browsing_grader_rejects_forms_assumptions_and_writes(tmp_path):
+    store = DraftStore(tmp_path / "db.sqlite")
+    try:
+        h = Harness(load_student("S005"), Catalog(), None, store)
+        h.last_search = {"field": "AI", "cities": ["Riyadh"], "major": "Artificial Intelligence", "kind": "coop"}
+        task = {"expect": {"draft_count": 0, "no_missing": True, "answer_any": ["OP012", "OP017"],
+                           "no_answer_text": ["/details"], "absent_search_filters": ["major", "kind"],
+                           "no_tools": ["save_application_draft"]}}
+        run = SimpleNamespace(final=FinalAnswer(answer="Please use /details first.", needs_info=["gpa"]),
+                              stopped="completed", events=[{"event": "tool_call", "tool": "save_application_draft"}])
+        failed = {c["grader"] for c in grade(task, [run], h) if not c["passed"]}
+        assert failed == {"browsing_without_personal_facts", "candidate_in_answer", "no_unneeded_intake_/details",
+                          "no_assumed_filter_major", "no_assumed_filter_kind", "no_tool_save_application_draft"}
+        h.last_search = {"field": "AI", "cities": ["Riyadh"]}
+        run.final = FinalAnswer(answer="Fictional AI options: OP012 and OP017.")
+        run.events = []
+        assert all(c["passed"] for c in grade(task, [run], h))
+    finally:
+        store.close()

@@ -94,6 +94,7 @@ def test_fixtures_and_eval_coverage():
     assert len(catalog.items) == 30
     assert all(x.synthetic and x.company.startswith("Synthetic") for x in catalog.items.values())
     tasks = load_tasks(ROOT / "tasks.jsonl")
-    assert len(tasks) == 20
+    assert len(tasks) == 25
     assert {t["category"] for t in tasks} == {"search", "missing", "constraints", "approval", "security"}
-    assert {t["lang"] for t in tasks} == {"ar", "en"}
+    assert {t["lang"] for t in tasks} == {"en"}
+    assert all(t["expect"]["english_only"] for t in tasks)

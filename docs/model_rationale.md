@@ -1,3 +1,5 @@
+> Historical model observations below are from the previous bilingual revision. The current conversational English source needs a fresh A/B run; no current pass rate is claimed. Original analysis is preserved in [history](history/2026-10-27/model_rationale.md).
+
 # Model selection and external evidence
 
 Reviewed 2026-10-27. Runtime verifies current zero pricing and tool support; no paid model or automatic fallback is enabled.

@@ -1,28 +1,26 @@
 {
   "local_contracts": {
     "passed": true,
-    "test_count": 87,
+    "test_count": 103,
     "evidence": "results/local/tests.xml"
   },
   "tools_and_mcp": "implemented; see real MCP integration tests and doctor output",
   "context_and_limits": "implemented; see finder/agent.py and runtime tests",
   "human_write_approval": "implemented; see approval tests, live eval approval cases and replay traces",
-  "eval_tasks": 20,
+  "eval_tasks": 25,
   "live_ab": {
-    "complete_current_experiment_source_runs": [
-      "results/live/20261027T202626-453723"
-    ],
-    "verified": true
+    "complete_current_experiment_source_runs": [],
+    "verified": false
   },
   "security_evidence": {
-    "live_experiment_verified": true,
+    "live_experiment_verified": false,
     "forced_action_guard_verified": true,
     "live_guard_causality_verified": false,
-    "requirements_met": true,
+    "requirements_met": false,
     "interpretation": "A completed live attack observation plus a separate before/after authorization test. Model resistance is not attributed to a guard it never reached."
   },
   "root_cause_analysis": {
-    "pending_marker_removed": true,
+    "pending_marker_removed": false,
     "human_review_required": true
   },
   "source_binding": {
@@ -33,6 +31,6 @@
     "note": "All runtime, prompts, tools, data, graders, evaluation runners and dependency hashes must match. Original full manifests remain unchanged. Local tests require exact current hashes."
   },
   "presentation": "excluded by project owner's cohort instructions; still present in published rubric",
-  "final_submission_ready": true,
+  "final_submission_ready": false,
   "note": "Technical evidence checklist, not a guarantee of passing. Manually review actual scores, analysis, model rationale and cohort submission rules. Live guard causality is reported independently; it is not inferred from a failed injection."
 }

@@ -1,6 +1,5 @@
 {
-  "request": "submission-preparation-resume-2026-10-27",
-  "purpose": "Resume the 29 unfinished A/B trials if the repository secret and account quota are available; preserve all observed behavioral failures.",
-  "resume": "results/live/20261027T202626-453723",
+  "request": "english-conversational-chat-2026-10-28",
+  "purpose": "Evaluate all 25 English tasks on A and B, including the exact AI/Riyadh request, profile-free follow-ups and requirements. Historical scores do not measure this source.",
   "synthetic_data_only": true
 }

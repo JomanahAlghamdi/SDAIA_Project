@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import json
 import sys
+import uuid
 from datetime import date
 from pathlib import Path
 
@@ -13,6 +14,7 @@ from pydantic import ValidationError
 from finder.agent import Agent
 from finder.catalog import Catalog, ROOT, load_student
 from finder.harness import Harness, Trace
+from finder.intake import CITIES, MAJORS, collect_details, new_student
 from finder.mcp_client import CatalogBridge
 from finder.models import Student
 from finder.provider import OpenRouter, ProviderError, ReplayProvider, free_tool_models, scripted_call, scripted_final
@@ -20,10 +22,23 @@ from finder.storage import DraftStore
 
 
 def approve_cli(preview):
-    print("\nمراجعة مسودة محلية — لم يتم إرسال أي طلب / LOCAL DRAFT PREVIEW")
+    print("\nLOCAL DRAFT PREVIEW - no application will be sent to an employer.")
     print(json.dumps({k: v for k, v in preview.items() if k != "profile_fingerprint"}, ensure_ascii=False, indent=2))
-    reply = input("حفظ هذه المسودة؟ اكتب YES أو نعم / Approve this exact draft? [no]: ").strip()
-    return reply in {"YES", "نعم"}
+    reply = input("Save this exact local draft? Type YES to approve; anything else declines: ").strip()
+    return reply == "YES"
+
+
+def session_input(args):
+    major, city = getattr(args, "major", None), getattr(args, "city", None)
+    if args.student:
+        if major or city:
+            raise ValueError("Use either an explicit --student test fixture or --major and --city, not both.")
+        student = load_student(args.student)
+        print(f"EXPLICIT TEST FIXTURE: {args.student}. These are fictional preset details, not your personal profile.")
+        return student, None
+    # Ordinary chat starts empty. The user's own message supplies search preferences;
+    # an interest in AI is not a declaration of an academic major.
+    return new_student(major), city
 
 
 async def demo(allow_interactive=False):
@@ -57,27 +72,54 @@ async def demo(allow_interactive=False):
 async def chat(args):
     connection = OpenRouter()  # Fail clearly on missing credentials before starting MCP.
     fixed_date = date.fromisoformat(args.as_of) if args.as_of else None
-    runtime = ROOT / "runtime"
+    print("Internship Finder | English | SYNTHETIC OPPORTUNITIES ONLY")
+    student, city = session_input(args)
+    # Anonymous sessions never reuse another session's drafts or academic details.
+    runtime = ROOT / "runtime" / ("fixtures" if args.student else "sessions") / (args.student or uuid.uuid4().hex)
     store = DraftStore(runtime / "drafts.sqlite")
     try:
         async with connection as provider, CatalogBridge(fixed_date) as bridge:
-            harness = Harness(load_student(args.student), Catalog(), bridge, store, approve_cli, fixed_date,
+            harness = Harness(student, Catalog(), bridge, store, approve_cli, fixed_date,
                               Trace(runtime / "audit.jsonl"))
             agent = Agent(harness, provider, args.config)
-            print("Internship Finder | فرص وطلاب اصطناعيون / SYNTHETIC DATA ONLY")
-            print("/profile | /set FIELD VALUE | /reset | /quit. All drafts stay local.")
-            print("Profile edits are trusted UI input, never model/tool arguments. GPA scale: 4.")
+            print("Hi! Tell me what kind of internship you are looking for.")
+            print('For example: "I need an internship opportunity for AI in Riyadh."')
+            print("/help: optional commands | /reset: new conversation | /quit: exit")
+            print(f"Demo catalog date: {harness.today().isoformat()}. Opportunities are fictional. No employer submissions.")
+            preferences = "; ".join(value for value in (
+                f"Academic major={student.major}" if getattr(args, "major", None) else "",
+                f"Preferred city={city}" if city else "") if value)
             while True:
-                text = args.prompt if args.command == "ask" else input("\nYou / أنت: ").strip()
+                if args.command == "ask":
+                    text = args.prompt
+                else:
+                    text = input("\nYou: ").strip()
+                if not text:
+                    continue
                 if text in {"/quit", "/exit"}:
                     break
-                if text == "/profile":
+                if text == "/help":
+                    print("Ask in English, for example: What are the requirements? Are there any in Jeddah?")
+                    print("Browsing needs no personal or academic record.")
+                    print("Optional eligibility demo: /details enters fictional academic values; /facts shows them.")
+                    print("/set FIELD VALUE edits one value. Only a separate YES prompt can approve a local draft.")
+                    print("/reset clears conversation and entered facts; saved drafts remain. /quit exits.")
+                    continue
+                if text in {"/facts", "/profile"}:
+                    print("Optional academic facts entered in this session (null means unknown):")
                     print(harness.student.model_dump_json(indent=2))
+                    continue
+                if text == "/details":
+                    harness.student = collect_details(harness.student)
+                    agent.history.clear()
+                    print("Session details updated. Ask me to check an opportunity, for example: Check OP001.")
                     continue
                 if text == "/reset":
                     agent.history.clear()
                     harness.last_search.clear()
-                    print("Conversation memory cleared; saved drafts remain.")
+                    harness.student = new_student() if not args.student else load_student(args.student)
+                    preferences = ""
+                    print("New conversation started; saved drafts remain.")
                     continue
                 if text.startswith("/set "):
                     try:
@@ -88,14 +130,19 @@ async def chat(args):
                         raw[field] = None if value == "null" else value
                         harness.student = Student.model_validate(raw)
                         agent.history.clear()
-                        print("Profile updated; conversation history cleared. /profile to inspect.")
+                        print("Academic fact updated; conversation history cleared. /facts to inspect.")
                     except (ValueError, ValidationError) as exc:
-                        print("Invalid profile update:", str(exc)[:250])
+                        print("Invalid academic value:", str(exc)[:250])
                     continue
+                if preferences:
+                    text = f"Optional preferences supplied at launch: {preferences}.\n{text}"
+                    preferences = ""
                 run = await agent.run(text)
                 print("\nAssistant:", run.final.answer if run.final else f"Stopped safely: {run.stopped}. No successful answer was produced.")
-                print("مسودات محلية فقط؛ لم يتم إرسال أي طلب / Local drafts only; no application sent.")
-                print(f"[{run.stopped}; requests={run.requests}; tokens={run.prompt_tokens + run.completion_tokens}; cost=${run.cost_usd:.6f}]")
+                if any(event.get("tool") == "save_application_draft" for event in run.events):
+                    print("Local drafts only; no application sent.")
+                if getattr(args, "verbose", False):
+                    print(f"[{run.stopped}; requests={run.requests}; tokens={run.prompt_tokens + run.completion_tokens}; cost=${run.cost_usd:.6f}]")
                 if args.command == "ask":
                     return 0 if run.stopped == "completed" else 2
     finally:
@@ -108,7 +155,10 @@ async def main():
     sub = parser.add_subparsers(dest="command", required=True)
     for command in ("chat", "ask"):
         p = sub.add_parser(command)
-        p.add_argument("--student", default="S001")
+        p.add_argument("--student", choices=[f"S{i:03}" for i in range(1, 7)], help="Explicit test fixture only; omitted by default")
+        p.add_argument("--major", choices=MAJORS, help="Optional academic major; ordinary chat needs no form")
+        p.add_argument("--city", choices=CITIES, help="Optional city; you can state it in your message instead")
+        p.add_argument("--verbose", action="store_true", help="Show request/token/cost diagnostics")
         p.add_argument("--config", choices=["A", "B"], default="B")
         p.add_argument("--as-of", help="Explicit demo clock; normal chat uses today's date")
         if command == "ask":
