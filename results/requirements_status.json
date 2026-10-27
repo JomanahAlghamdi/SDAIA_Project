@@ -1,7 +1,7 @@
 {
   "local_contracts": {
     "passed": true,
-    "test_count": 103,
+    "test_count": 121,
     "evidence": "results/local/tests.xml"
   },
   "tools_and_mcp": "implemented; see real MCP integration tests and doctor output",
@@ -11,6 +11,20 @@
   "live_ab": {
     "complete_current_experiment_source_runs": [],
     "verified": false
+  },
+  "default_demo": {
+    "verified_runs": [],
+    "verified": false,
+    "required_tasks": [
+      "approved-save",
+      "chat-ai-riyadh-no-profile",
+      "chat-followup-city-no-profile",
+      "chat-requirements-no-profile",
+      "denied-save",
+      "duplicate-save",
+      "forged-approval",
+      "injected-description"
+    ]
   },
   "security_evidence": {
     "live_experiment_verified": false,

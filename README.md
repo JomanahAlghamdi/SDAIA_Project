@@ -5,7 +5,7 @@ An English-only conversational AI assistant that starts with a message such as *
 **Track:** 2 — Your harness
 **Project owner:** Jomanah Alghamdi
 **Data:** 30 synthetic opportunities; 6 explicitly selectable test profiles. Normal chat starts with an empty academic record.
-**Revision status:** Conversational English chat implemented; current live A/B evaluation and security observation must be completed before submission. The previous bilingual version's A=80% / B=100% scores are historical, not scores for this revision. See [current status](results/current_run_status.json) and [requirement review](docs/requirements.md).
+**Revision status:** Conversational English chat and token-budget regression fix implemented; current live A/B evaluation and security observation must be completed before submission. The previous bilingual version's A=80% / B=100% scores are historical, not scores for this revision. See [current status](results/current_run_status.json) and [requirement review](docs/requirements.md).
 
 Start here: [Windows setup and walkthrough](START_HERE.md). [Repository](https://github.com/JomanahAlghamdi/SDAIA_Project) · [CI](https://github.com/JomanahAlghamdi/SDAIA_Project/actions/workflows/checks.yml).
 
@@ -91,7 +91,9 @@ The configured model is `nvidia/nemotron-3.5-lightning:free` through OpenRouter.
 
 [Architecture diagram](docs/architecture.md). The model selects search/detail/eligibility tools; code controls academic input validation and all writes. Major and opportunity field are separate filters: an AI student can browse a Data opportunity that accepts AI majors.
 
-Limits per user request: 8 model calls, 20 tool calls, 24,000 actual total tokens, 900 output tokens per call, USD 0.05 ceiling, and a 16,000-token conservative UTF-8-byte input upper bound. Old complete conversation pairs are dropped first; tool results are capped at 4,000 characters. Actual usage is logged separately. Positive reported provider cost stops execution before tool actions; charges already incurred cannot be undone. There is no deployment-wide daily spend cap.
+Limits per user request: 8 model calls, 20 tool calls, a cumulative 24,000-token budget, at most 900 output tokens per call, USD 0.05 ceiling and a 16,000-unit conservative UTF-8-byte context bound (including framing reserve). The first request reserves the full byte bound; later requests reuse the provider's measured token count for the unchanged prefix and reserve bytes only for newly appended messages. This is an estimate, not an exact model tokenizer. Actual provider usage is checked again before any tool action; unexpectedly high usage stops the run, and already incurred usage cannot be undone. Output allowance shrinks to the remaining reservation. Old complete conversation pairs can be removed between steps; current tool-call/result pairs remain intact. Tool results are capped at 4,000 characters. Positive reported cost stops tool execution; no paid fallback or deployment-wide daily cap is implemented.
+
+The previous English revision could report `token_budget` on the first ordinary AI/Riyadh question: its reservation treated all serialized bytes as fresh tokens on every step. A metered regression reproduces a stop after 11,750 reported test tokens; the repaired loop completes the same scripted search/details/answer at 16,700 test tokens, under the unchanged 24,000 limit. These are explicit test-double measurements, not live LLM results. Current live A/B evaluation remains required. See [the review](docs/FINAL_REVIEW_AR.md).
 
 ## Tools
 
@@ -106,7 +108,7 @@ MCP uses the pinned official Python SDK. Its subprocess receives no OpenRouter k
 
 ## Evaluation
 
-**Current suite:** 25 English tasks in `tasks.jsonl`: 10 search, 4 missing-information, 5 constraints, 4 approval and 2 security cases. This includes three multi-turn tasks, two major/city scenarios and three no-profile browsing scenarios. Fixtures supply known or deliberately missing academic values; CLI integration tests separately exercise the direct chat startup, exact user-message forwarding, follow-up history and session isolation.
+**Current suite:** 25 English tasks in `tasks.jsonl`: 10 search, 4 missing-information, 5 constraints, 4 approval and 2 security cases. This includes four multi-turn tasks, two major/city scenarios and three no-profile browsing scenarios. Fixtures supply known or deliberately missing academic values; CLI integration tests separately exercise the direct chat startup, exact user-message forwarding, follow-up history and session isolation.
 
 **Configurations:** A uses the base spec. B adds exactly one requirement to call `check_eligibility` before describing suitability or putting a recommended ID in `opportunity_ids`. Both use the same model, data, tools and enforced write guards.
 
@@ -142,7 +144,7 @@ Only fictional/public data may be used for coursework. Do not enter university c
 
 ## Reproducibility and submission
 
-CI runs local contracts and real MCP integration on Windows and Linux. A separate source-bound submission-evidence job remains strict: it must fail while current live evaluation/security evidence or error analysis is missing. Local test success alone is not submission readiness. GitHub's live workflow reads `OPENROUTER_API_KEY` from repository **Actions secrets**; never paste a key into source, chat or a workflow input. Download, inspect and commit its actual evidence artifact before updating results and marking this revision ready.
+CI runs local contracts and real MCP integration on Windows and Linux. A separate source-bound submission-evidence job requires the ordinary-chat and approval/security demonstration tasks to pass under default configuration B, as well as complete A/B evidence using one effective model and recorded budget settings. It remains strict: it must fail while current live evaluation/security evidence or error analysis is missing. Local test success alone is not submission readiness. GitHub's live workflow reads `OPENROUTER_API_KEY` from repository **Actions secrets**; never paste a key into source, chat or a workflow input. Download, inspect and commit its actual evidence artifact before updating results and marking this revision ready.
 
 The [official capstone requirements](https://github.com/SDAIAAcademy/agentic-ai/blob/main/labs/capstone/README.md) and [README template](https://github.com/SDAIAAcademy/agentic-ai/blob/main/labs/capstone/TEMPLATE_README.md) do not impose Arabic or bilingual support. The course's Rafeeq example is bilingual; Track 2 does not inherit that as a stated minimum. English is this project's chosen interface language. The published submission includes slides/presentation; these remain excluded per the owner's cohort instructions, not because the published rubric removed them.
 

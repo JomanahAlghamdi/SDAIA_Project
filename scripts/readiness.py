@@ -16,6 +16,19 @@ from evals.security import verified_live_defence  # noqa: E402
 # These two files only inspect/test recorded evidence; neither runs the agent,
 # changes grading, nor supplies model context. All experiment inputs stay bound.
 EVIDENCE_REVIEW_FILES = {"scripts/readiness.py", "tests/test_readiness.py"}
+CORE_DEMO_TASKS = {"chat-ai-riyadh-no-profile", "chat-followup-city-no-profile", "chat-requirements-no-profile",
+                   "approved-save", "denied-save", "duplicate-save", "injected-description", "forged-approval"}
+
+
+def core_demo_passes(path):
+    """A completed experiment alone must not certify a broken default demo."""
+    try:
+        with (path / "eval_B.csv").open(encoding="utf-8", newline="") as stream:
+            rows = [row for row in csv.DictReader(stream) if row["task_id"] in CORE_DEMO_TASKS]
+        return ({row["task_id"] for row in rows} == CORE_DEMO_TASKS
+                and all(row["config"] == "B" and row["passed"] == "True" and row["stopped"] == "completed" for row in rows))
+    except (OSError, KeyError):
+        return False
 
 
 def experiment_source_matches(recorded, current):
@@ -59,6 +72,7 @@ def valid_completed_run(path, manifest, tasks, current):
     ids = {t["id"] for t in tasks}
     trials = manifest.get("trials")
     if (manifest.get("status") != "complete" or manifest.get("mode") != "live_openrouter"
+            or not manifest.get("requested_model") or not manifest.get("effective_limits")
             or set(manifest.get("configurations", [])) != {"A", "B"}
             or not isinstance(trials, int) or trials < 1
             or manifest.get("task_count") != len(tasks)
@@ -67,6 +81,7 @@ def valid_completed_run(path, manifest, tasks, current):
             or not experiment_source_matches(manifest.get("hashes"), current)):
         return False
     expected = {(task, trial) for task in ids for trial in range(1, trials + 1)}
+    effective_models = set()
     try:
         for config in ("A", "B"):
             with (path / f"eval_{config}.csv").open(encoding="utf-8", newline="") as f:
@@ -74,6 +89,10 @@ def valid_completed_run(path, manifest, tasks, current):
             if len(rows) != len(expected) or {(r["task_id"], int(r["trial"])) for r in rows} != expected:
                 return False
             for row in rows:
+                models = set(filter(None, row.get("effective_models", "").split(";")))
+                if len(models) != 1:
+                    return False
+                effective_models.update(models)
                 transcript = (path / row["transcript"]).resolve()
                 if (row["config"] != config or row["passed"] not in {"True", "False"}
                         or row["stopped"] in {"provider_error", "unexpected_provider_cost", "cost_budget", "not_run"}
@@ -81,7 +100,7 @@ def valid_completed_run(path, manifest, tasks, current):
                     return False
     except (OSError, ValueError, KeyError, TypeError):
         return False
-    return True
+    return len(effective_models) == 1
 
 
 def main():
@@ -109,6 +128,7 @@ def main():
         path = ROOT / "results" / ("security_" + mode) / "report.json"
         reports[mode] = json.loads(path.read_text()) if path.exists() else {}
     security = security_evidence(reports["live"], reports["replay"], current)
+    working_demo_runs = [path for path in complete if core_demo_passes(ROOT / path)]
     analysis_done = "PENDING_LIVE_EVALUATION" not in (ROOT / "docs/error_analysis.md").read_text(encoding="utf-8")
     report = {
         "local_contracts": {"passed": local_ok, "test_count": local_count, "evidence": "results/local/tests.xml"},
@@ -117,12 +137,14 @@ def main():
         "human_write_approval": "implemented; see approval tests, live eval approval cases and replay traces",
         "eval_tasks": len(tasks),
         "live_ab": {"complete_current_experiment_source_runs": complete, "verified": bool(complete)},
+        "default_demo": {"verified_runs": working_demo_runs, "verified": bool(working_demo_runs),
+                         "required_tasks": sorted(CORE_DEMO_TASKS)},
         "security_evidence": security,
         "root_cause_analysis": {"pending_marker_removed": analysis_done, "human_review_required": True},
         "source_binding": {"excluded_read_only_review_files": sorted(EVIDENCE_REVIEW_FILES),
                            "note": "All runtime, prompts, tools, data, graders, evaluation runners and dependency hashes must match. Original full manifests remain unchanged. Local tests require exact current hashes."},
         "presentation": "excluded by project owner's cohort instructions; still present in published rubric",
-        "final_submission_ready": bool(local_ok and complete and security["requirements_met"] and analysis_done),
+        "final_submission_ready": bool(local_ok and working_demo_runs and security["requirements_met"] and analysis_done),
         "note": "Technical evidence checklist, not a guarantee of passing. Manually review actual scores, analysis, model rationale and cohort submission rules. Live guard causality is reported independently; it is not inferred from a failed injection."
     }
     (ROOT / "results/requirements_status.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import math
 from dataclasses import dataclass, field
 
 from pydantic import ValidationError
@@ -27,6 +28,16 @@ class Limits:
     max_tool_result_chars: int = 4000
     max_history_messages: int = 12
 
+    def __post_init__(self):
+        counts = (self.max_steps, self.max_tool_calls, self.max_total_tokens, self.max_context_bound,
+                  self.max_output_tokens, self.max_tool_result_chars, self.max_history_messages)
+        if any(not isinstance(value, int) or value <= 0 for value in counts):
+            raise ValueError("All count and size limits must be positive integers")
+        if self.max_history_messages % 2:
+            raise ValueError("Conversation history must retain complete message pairs")
+        if not math.isfinite(self.max_cost_usd) or self.max_cost_usd <= 0:
+            raise ValueError("Cost limit must be finite and positive")
+
     @classmethod
     def environment(cls):
         obj = cls(max_steps=int(os.getenv("IF_MAX_STEPS", "8")),
@@ -44,6 +55,34 @@ def token_upper_bound(value) -> int:
     return len(json.dumps(value, ensure_ascii=False).encode("utf-8")) + 512
 
 
+class PromptBudget:
+    """Use measured usage for an unchanged prefix, bytes only for new messages.
+
+    This is a conservative reservation estimate, not an exact model tokenizer.
+    Actual provider usage is still checked before executing any tool action.
+    """
+    def __init__(self):
+        self.message_count = 0
+        self.prefix_json = ""
+        self.tools_json = ""
+        self.prompt_tokens = 0
+
+    def estimate(self, messages, tools):
+        full = token_upper_bound([messages, tools])
+        if (self.prompt_tokens > 0 and len(messages) >= self.message_count
+                and json.dumps(messages[:self.message_count], ensure_ascii=False) == self.prefix_json
+                and json.dumps(tools, ensure_ascii=False) == self.tools_json):
+            added = token_upper_bound(messages[self.message_count:])
+            return min(full, self.prompt_tokens + added), "measured_prefix_plus_new_bytes"
+        return full, "full_utf8_bytes"
+
+    def observe(self, messages, tools, prompt_tokens):
+        self.message_count = len(messages)
+        self.prefix_json = json.dumps(messages, ensure_ascii=False)
+        self.tools_json = json.dumps(tools, ensure_ascii=False)
+        self.prompt_tokens = prompt_tokens
+
+
 @dataclass
 class Run:
     final: FinalAnswer | None = None
@@ -56,6 +95,7 @@ class Run:
     models: list[str] = field(default_factory=list)
     events: list[dict] = field(default_factory=list)
     transcript: list[dict] = field(default_factory=list)
+    error: str = ""
 
 
 class Agent:
@@ -92,24 +132,43 @@ class Agent:
             messages = [messages[0], *history, {"role": "user", "content": prompt}]
         self.harness.trace.add("run_start", config=self.config, profile_id=self.harness.student.id,
                                history_kept=len(history), history_removed=len(self.history) - len(history))
+        meter = PromptBudget()
         for _ in range(self.limits.max_steps):
             bound = token_upper_bound([messages, tools])
+            estimate, basis = meter.estimate(messages, tools)
+            spent = run.prompt_tokens + run.completion_tokens
+            # Retire only old complete user/answer pairs. Current tool-call/result
+            # pairs and the current request must remain intact.
+            while history and (bound > self.limits.max_context_bound
+                               or spent + estimate + min(64, self.limits.max_output_tokens) > self.limits.max_total_tokens):
+                history = history[2:]
+                del messages[1:3]
+                self.harness.trace.add("history_compacted", removed_messages=2)
+                bound = token_upper_bound([messages, tools])
+                estimate, basis = meter.estimate(messages, tools)
             if bound > self.limits.max_context_bound:
                 run.stopped = "context_budget"
                 break
-            if run.prompt_tokens + run.completion_tokens + bound + self.limits.max_output_tokens > self.limits.max_total_tokens:
+            remaining_output = self.limits.max_total_tokens - spent - estimate
+            if remaining_output < min(64, self.limits.max_output_tokens):
                 run.stopped = "token_budget"
                 break
+            output_limit = min(self.limits.max_output_tokens, remaining_output)
             if run.cost_usd >= self.limits.max_cost_usd:
                 run.stopped = "cost_budget"
                 break
             run.requests += 1
+            self.harness.trace.add("request_budget", spent_tokens=spent,
+                                   prompt_reservation=estimate, reservation_basis=basis,
+                                   max_output_tokens=output_limit, total_limit=self.limits.max_total_tokens)
             try:
-                completion = await self.provider.complete(messages, tools, self.limits.max_output_tokens)
+                completion = await self.provider.complete(messages, tools, output_limit)
             except (ProviderError, StopIteration, RuntimeError) as exc:
                 run.stopped = "provider_error"
+                run.error = str(exc)[:180]
                 self.harness.trace.add("provider_error", message=str(exc)[:180])
                 break
+            meter.observe(messages, tools, completion.prompt_tokens)
             run.prompt_tokens += completion.prompt_tokens
             run.completion_tokens += completion.completion_tokens
             run.cost_usd += completion.cost_usd
@@ -146,7 +205,7 @@ class Agent:
                         result = await self.harness.dispatch(fn["name"], arguments)
                     except (KeyError, TypeError, json.JSONDecodeError):
                         result = {"error": "malformed_tool_call"}
-                    text = json.dumps(result, ensure_ascii=False)
+                    text = json.dumps(result, ensure_ascii=False, separators=(",", ":"))
                     if len(text) > self.limits.max_tool_result_chars:
                         text = json.dumps({"truncated": True, "excerpt": text[:self.limits.max_tool_result_chars],
                                            "instruction": "Ask for a smaller page or a specific ID."}, ensure_ascii=False)
@@ -173,7 +232,9 @@ class Agent:
         if run.final:
             self.history = [*history, {"role": "user", "content": prompt},
                             {"role": "assistant", "content": run.final.model_dump_json()}][-self.limits.max_history_messages:]
-        self.harness.trace.add("run_end", stopped=run.stopped, requests=run.requests, tool_calls=run.tool_calls)
+        self.harness.trace.add("run_end", stopped=run.stopped, requests=run.requests, tool_calls=run.tool_calls,
+                               prompt_tokens=run.prompt_tokens, completion_tokens=run.completion_tokens,
+                               cost_usd=run.cost_usd)
         run.events = self.harness.trace.events[start_event:]
         run.transcript = messages
         return run

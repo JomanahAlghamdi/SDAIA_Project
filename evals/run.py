@@ -10,12 +10,13 @@ import platform
 import sys
 import tempfile
 import time
+from dataclasses import asdict
 from datetime import date, datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
 
-from finder.agent import Agent
+from finder.agent import Agent, Limits
 from finder.catalog import Catalog, ROOT, load_student
 from finder.harness import Harness, Trace
 from finder.mcp_client import CatalogBridge
@@ -62,6 +63,7 @@ async def evaluate(args):
         out.mkdir()
         manifest = {"schema_version": 2, "status": "not_started", "mode": "live_openrouter", "configurations": args.config,
                 "task_count": len(tasks), "trials": args.trials, "python": platform.python_version(),
+                "effective_limits": asdict(Limits.environment()),
                 "hashes": hashes(), "task_file_sha256": task_digest, "rows": 0, "attempts": [], "provider_interruptions": [],
                 "cache": "no application response cache; explicit resume retains completed task trials (including behavioral failures)",
                 "approval": "explicit per-task simulated human decisions; isolated synthetic DB"}
@@ -74,6 +76,9 @@ async def evaluate(args):
     try:
         async with OpenRouter() as provider:
             manifest.update(status="running", requested_model=provider.model)
+            metadata = getattr(provider, "metadata", {})
+            manifest["model_metadata"] = {key: metadata[key] for key in
+                ("id", "context_length", "supported_parameters", "pricing") if key in metadata}
             write_manifest()
             # Interleave A/B within each task/trial to reduce order/time confounds.
             async with CatalogBridge(date(2026, 10, 27)) as bridge:
@@ -146,6 +151,7 @@ def resume_state(out, configs, trials, tasks, task_digest, model):
     manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
     required = {"schema_version": 2, "mode": "live_openrouter", "configurations": configs,
                 "trials": trials, "task_count": len(tasks), "task_file_sha256": task_digest,
+                "effective_limits": asdict(Limits.environment()),
                 "hashes": hashes(), "requested_model": model}
     if manifest.get("status") not in {"incomplete", "blocked"} or any(manifest.get(k) != v for k, v in required.items()):
         raise ValueError("Resume requires matching source, tasks, model, configurations and trials, and an incomplete v2 run")

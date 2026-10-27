@@ -1,8 +1,8 @@
 {
-  "revision": "english_conversational_chat",
+  "revision": "english_chat_budget_fix",
   "local_tests": {
-    "evidence": "results/local/verification.json",
-    "passed": 103
+    "passed": 121,
+    "evidence": "results/local/verification.json"
   },
   "live_status": "pending",
   "completed_trials": 0,
@@ -11,5 +11,5 @@
   "historical_run": "results/live/20261027T202626-453723",
   "historical_metrics_apply_to_current_source": false,
   "technical_submission_evidence_ready": false,
-  "note": "No current live-model accuracy claim. See START_HERE.md to run the chatbot and the evaluation workflow."
+  "note": "Token-budget regression fixed under the unchanged 24000 limit. Local tests are not live-model measurements. Full A/B plus live security and human transcript review remain required."
 }

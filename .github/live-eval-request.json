@@ -1,5 +1,5 @@
 {
-  "request": "english-conversational-chat-2026-10-28",
-  "purpose": "Evaluate all 25 English tasks on A and B, including the exact AI/Riyadh request, profile-free follow-ups and requirements. Historical scores do not measure this source.",
+  "request": "token-budget-review-2026-10-28",
+  "purpose": "Evaluate the token-budget fix with the ordinary no-profile chat cases first, then all 25 tasks on A/B and live security. Require fresh source-matched evidence; no historical-score reuse.",
   "synthetic_data_only": true
 }

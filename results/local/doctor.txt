@@ -7,5 +7,7 @@
   "mcp_protocol": "2025-11-25",
   "mcp_search_ok": true,
   "key_present": false,
-  "model_configured": false
+  "model_configured": false,
+  "max_request_tokens": 24000,
+  "budget_method": "measured_prefix_plus_new_bytes"
 }

@@ -10,7 +10,7 @@ Authority: [capstone requirements](https://github.com/SDAIAAcademy/agentic-ai/bl
 | ≥1 MCP tool | Search/details over separate stdio MCP process | Real SDK integration tests and live traces |
 | Context file | `prompts/system.md`; one B instruction in `prompts/config_b.txt` | Loaded in each request; hashed in the manifest |
 | Memory/retrieval | Empty normal session, last search, six complete conversation pairs, catalog retrieval; optional academic facts for eligibility only | Local follow-up/history integration plus three planned live multi-turn tasks |
-| Compaction/context budget | Old complete pairs removed; tool-result cap; conservative input bound | Runtime tests and actual A token-budget stop |
+| Compaction/context budget | Old complete pairs removed; tool-result cap; measured-prefix reservation with byte fallback | Metered regression, between-step history compaction, overshoot-before-write tests; live rerun pending |
 | Permissions and approved write | Host-only one-use content-bound consent; recheck before SQLite commit | Local approval tests; current live approval cases pending; approval unit tests |
 | Step/cost budgets | 8 model calls / 20 tools per request; token and cost checks; verified-free provider | Actual usage records and local budget tests; no paid fallback |
 | ≥15 automatically graded tasks | 25 English tasks across 5 categories; course-standard fields and executable graders | `tasks.jsonl`, `evals/graders.py`; 50 current trials pending; previous 40 trials preserved as history |
@@ -29,7 +29,7 @@ Authority: [capstone requirements](https://github.com/SDAIAAcademy/agentic-ai/bl
 
 The course does not require manufacturing a successful live model compromise. This project reports live resistance to the attempted injection and separately demonstrates the code guard stopping the requested malicious action. Live guard causality for that specific injection remains **unverified**, not silently inferred. Broader robustness needs more attacks and trials.
 
-The read-only readiness checker and its own test changed after the full evaluation. Only `scripts/readiness.py` and `tests/test_readiness.py` are excluded from experiment-source compatibility; runtime, prompt, data, dependency, grader and evaluation-runner hashes must match. Original full manifests are preserved. Local verification requires exact current full hashes.
+The historical evaluation predates the current runtime, tasks and evidence checks. New manifests record effective limits and model metadata; default configuration B must pass the core chat and approval/security demo cases before readiness can be true. Only `scripts/readiness.py` and `tests/test_readiness.py` are excluded from experiment-source compatibility; runtime, prompt, data, dependency, grader and evaluation-runner hashes must match. Original full manifests are preserved. Local verification requires exact current full hashes.
 
 ## Published rubric
 

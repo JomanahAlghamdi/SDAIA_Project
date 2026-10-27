@@ -11,7 +11,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from pydantic import ValidationError
 
-from finder.agent import Agent
+from finder.agent import Agent, Limits
 from finder.catalog import Catalog, ROOT, load_student
 from finder.harness import Harness, Trace
 from finder.intake import CITIES, MAJORS, collect_details, new_student
@@ -39,6 +39,29 @@ def session_input(args):
     # Ordinary chat starts empty. The user's own message supplies search preferences;
     # an interest in AI is not a declaration of an academic major.
     return new_student(major), city
+
+
+def show_run(run, verbose=False):
+    if run.final:
+        print("\nAssistant:", run.final.answer)
+    else:
+        explanations = {
+            "token_budget": "I reached this request's token limit before finishing. Try one opportunity at a time, or /reset for a new conversation.",
+            "context_budget": "This conversation is too long for one request. Use /reset and ask a shorter question.",
+            "step_budget": "I reached the step limit before finishing. Try a narrower request.",
+            "tool_budget": "I reached the tool limit before finishing. Try a narrower request.",
+            "input_limit": "Please enter a message of 1 to 4,000 characters.",
+            "provider_error": run.error or "The model provider could not complete this request.",
+        }
+        print("\nAssistant:", explanations.get(run.stopped, "The request stopped before a complete answer was produced."))
+    # Report actual write outcomes even when the final model response fails.
+    for event in run.events:
+        if event.get("event") == "tool_result" and event.get("tool") == "save_application_draft":
+            result = event["result"]
+            print("Local draft result:", result.get("status", result.get("error", "unknown")),
+                  result.get("opportunity_id", ""), result.get("draft_id", ""), "| No application sent.")
+    if verbose or not run.final:
+        print(f"[{run.stopped}; requests={run.requests}; tokens={run.prompt_tokens + run.completion_tokens}; cost=${run.cost_usd:.6f}]")
 
 
 async def demo(allow_interactive=False):
@@ -70,6 +93,8 @@ async def demo(allow_interactive=False):
 
 
 async def chat(args):
+    if args.command == "ask" and (not args.prompt.strip() or args.prompt.strip().startswith("/")):
+        raise ValueError("ask needs an English question. Slash commands belong in interactive chat.")
     connection = OpenRouter()  # Fail clearly on missing credentials before starting MCP.
     fixed_date = date.fromisoformat(args.as_of) if args.as_of else None
     print("Internship Finder | English | SYNTHETIC OPPORTUNITIES ONLY")
@@ -138,11 +163,7 @@ async def chat(args):
                     text = f"Optional preferences supplied at launch: {preferences}.\n{text}"
                     preferences = ""
                 run = await agent.run(text)
-                print("\nAssistant:", run.final.answer if run.final else f"Stopped safely: {run.stopped}. No successful answer was produced.")
-                if any(event.get("tool") == "save_application_draft" for event in run.events):
-                    print("Local drafts only; no application sent.")
-                if getattr(args, "verbose", False):
-                    print(f"[{run.stopped}; requests={run.requests}; tokens={run.prompt_tokens + run.completion_tokens}; cost=${run.cost_usd:.6f}]")
+                show_run(run, getattr(args, "verbose", False))
                 if args.command == "ask":
                     return 0 if run.stopped == "completed" else 2
     finally:
@@ -181,7 +202,9 @@ async def main():
                               "mcp_protocol": bridge.initialized.protocolVersion,
                               "mcp_search_ok": result["total"] > 0,
                               "key_present": bool(os.getenv("OPENROUTER_API_KEY")),
-                              "model_configured": bool(os.getenv("OPENROUTER_MODEL"))}, indent=2))
+                              "model_configured": bool(os.getenv("OPENROUTER_MODEL")),
+                              "max_request_tokens": Limits.environment().max_total_tokens,
+                              "budget_method": "measured_prefix_plus_new_bytes"}, indent=2))
     else:
         return await chat(args)
 

@@ -82,3 +82,9 @@ uv run python scripts/readiness.py --require-live
 ```
 
 The second command deliberately fails until evidence matches the current code, tasks and prompts. Old bilingual results must not be presented as measurements of the new English chat.
+
+## Token-budget fix and diagnosis
+
+Use the current download; the previous English revision could stop on a simple AI/Riyadh request. The repaired reservation calculation works with the existing `IF_MAX_REQUEST_TOKENS=24000`; you do not need to raise it or replace your key. `doctor` now reports `budget_method: measured_prefix_plus_new_bytes` so you can identify the updated copy. If a request stops, the CLI shows its reason, request count and measured usage. Local draft outcomes are printed even if a later model answer fails.
+
+The eval manifest records effective budgets; a resume refuses changed budgets. The ordinary-chat cases run first, including the user's exact message and a natural requirements follow-up. Finishing a run alone does not certify a working chatbot: default B's core demo cases must pass.

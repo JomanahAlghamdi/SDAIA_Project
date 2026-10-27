@@ -4,10 +4,27 @@ import csv
 
 import pytest
 
-from scripts.readiness import experiment_source_matches, security_evidence, valid_completed_run
+from scripts.readiness import CORE_DEMO_TASKS, core_demo_passes, experiment_source_matches, security_evidence, valid_completed_run
 
 
 SOURCE = {"tasks.jsonl": "task-fixture", "finder/agent.py": "agent-fixture", "evals/graders.py": "grader-fixture", "scripts/readiness.py": "old-checker"}
+
+
+@pytest.mark.parametrize("defect", [None, "failed_chat", "missing_chat", "wrong_config"])
+def test_readiness_requires_working_default_chat_and_authorization_demo(tmp_path, defect):
+    rows = [{"task_id": name, "config": "B", "passed": "True", "stopped": "completed"}
+            for name in sorted(CORE_DEMO_TASKS)]
+    if defect == "failed_chat":
+        next(row for row in rows if row["task_id"] == "chat-ai-riyadh-no-profile").update(passed="False", stopped="token_budget")
+    elif defect == "missing_chat":
+        rows = [row for row in rows if row["task_id"] != "chat-ai-riyadh-no-profile"]
+    elif defect == "wrong_config":
+        rows[0]["config"] = "A"
+    with (tmp_path / "eval_B.csv").open("w", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    assert core_demo_passes(tmp_path) is (defect is None)
 
 
 def reports():
@@ -51,22 +68,26 @@ def test_only_read_only_checker_and_its_test_can_change():
         assert not experiment_source_matches(SOURCE, changed)
 
 
-@pytest.mark.parametrize("defect", [None, "duplicate_trial", "provider_error", "missing_transcript", "manifest_count"])
+@pytest.mark.parametrize("defect", [None, "duplicate_trial", "provider_error", "missing_transcript", "manifest_count", "mixed_models", "missing_limits"])
 def test_completed_suite_requires_unique_trials_and_actual_transcripts(tmp_path, defect):
     tasks = [{"id": "fixture-one"}, {"id": "fixture-two"}]
     manifest = {"status": "complete", "mode": "live_openrouter", "configurations": ["A", "B"], "trials": 1, "rows": 4,
+                "requested_model": "test-model:free", "effective_limits": {"max_steps": 8},
                 "task_count": 2, "task_file_sha256": SOURCE["tasks.jsonl"], "hashes": dict(SOURCE)}
     for config in ("A", "B"):
         rows = []
         for task in tasks:
             transcript = f"{config}-{task['id']}.json"
             (tmp_path / transcript).write_text('{"test_fixture": true}')
-            rows.append({"config": config, "task_id": task["id"], "trial": 1, "passed": "True", "stopped": "completed", "transcript": transcript})
+            rows.append({"config": config, "task_id": task["id"], "trial": 1, "passed": "True", "stopped": "completed", "transcript": transcript,
+                         "effective_models": "test-model:free"})
         if config == "B":
             if defect == "duplicate_trial": rows[1]["task_id"] = rows[0]["task_id"]
             elif defect == "provider_error": rows[0]["stopped"] = "provider_error"
             elif defect == "missing_transcript": (tmp_path / rows[0]["transcript"]).unlink()
             elif defect == "manifest_count": manifest["rows"] = 3
+            elif defect == "mixed_models": rows[0]["effective_models"] = "different-model:free"
+            elif defect == "missing_limits": manifest.pop("effective_limits")
         with (tmp_path / f"eval_{config}.csv").open("w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=list(rows[0])); writer.writeheader(); writer.writerows(rows)
     assert valid_completed_run(tmp_path, manifest, tasks, SOURCE) is (defect is None)

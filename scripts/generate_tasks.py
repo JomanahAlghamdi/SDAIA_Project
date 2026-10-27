@@ -81,9 +81,11 @@ add("chat-followup-city-no-profile", "search", "S005",
      "absent_search_filters": ["major", "kind"], "answer_any": ["OP002"],
      "no_tools": ["save_application_draft"]})
 add("chat-requirements-no-profile", "search", "S005",
-    "What are the requirements and duration for OP012?",
+    ["I need an internship opportunity for AI in Riyadh", "What are the requirements?"],
     {"no_ids": True, "no_missing": True, "tools": ["get_opportunity_details"],
-     "answer_any": ["OP012"], "no_answer_text": ["/details", "/profile", "provide your GPA"],
+     "answer_any": ["OP012", "OP017"], "no_answer_text": ["/details", "/profile", "provide your GPA"],
      "no_tools": ["save_application_draft"]})
+# Exercise ordinary chat before fixture-based checks so startup failures surface early.
+tasks.sort(key=lambda task: not task["id"].startswith("chat-"))
 (ROOT / "tasks.jsonl").write_text("".join(json.dumps(x, ensure_ascii=False) + "\n" for x in tasks), encoding="utf-8")
 print(f"Wrote {len(tasks)} live evaluation tasks.")
