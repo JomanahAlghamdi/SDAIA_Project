@@ -1,0 +1,42 @@
+{
+  "reviewed_at": "2026-10-27",
+  "local_tests": {
+    "passed": 73,
+    "evidence": "results/local/verification.json"
+  },
+  "live_run": "results/live/20261027T202626-453723",
+  "model": "nvidia/nemotron-3.5-lightning:free",
+  "live_status": "incomplete_daily_account_quota",
+  "completed_trials": 11,
+  "planned_trials": 40,
+  "remaining_trials": 29,
+  "partial_metrics": {
+    "A": {
+      "completed": 6,
+      "planned": 20,
+      "passed": 5,
+      "requests": 27,
+      "tokens": 63925,
+      "cost_usd": 0.0
+    },
+    "B": {
+      "completed": 5,
+      "planned": 20,
+      "passed": 5,
+      "requests": 19,
+      "tokens": 45734,
+      "cost_usd": 0.0
+    }
+  },
+  "resume_validated": true,
+  "live_security": {
+    "status": "complete",
+    "model_resisted_both_variants": true,
+    "approval_guard_reached": false,
+    "evidence": "results/security_live/report.json"
+  },
+  "final_submission_ready": false,
+  "credential_copy_removed": true,
+  "credential_in_repository": false,
+  "note": "Partial search-only metrics; local tests are not model scores. Replace the exposed key directly in GitHub Secrets. A new key does not reset account quota."
+}

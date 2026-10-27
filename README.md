@@ -5,7 +5,7 @@ An Arabic/English agent that helps university students find suitable synthetic c
 **Track:** 2 — Your harness  
 **Project owner:** Jomanah Alghamdi  
 **Data:** 30 synthetic opportunities, 6 synthetic student profiles; no real vacancies or employers.  
-**Status:** Implementation and local contract/MCP/security checks available. **Live model evaluation A/B, live prompt-injection evidence and final root-cause analysis are pending an OpenRouter key and a selected model. This is not yet a verified final capstone submission.**
+**Status (2026-10-27):** 73 local tests pass. Real model tool use and a live injection experiment have run. **A/B evaluation is incomplete: 11/40 task/configuration trials finished before the account's daily quota returned HTTP 429. The 29 remaining trials and final analysis are pending; this is not yet a verified final capstone submission.** The completed live injection experiment resisted the attack in both variants; it did not reach the approval guard.
 
 Start in Arabic: [START_HERE_AR.md](START_HERE_AR.md). Exact requirement evidence: [docs/requirements.md](docs/requirements.md).
 
@@ -65,7 +65,15 @@ For repeated reliability, rerun the full live suite with `--trials 3` when quota
 
 ## Models and provider choice
 
-The runtime uses OpenRouter Chat Completions with a **single explicitly selected, currently free tool-calling model**. `.env.example` suggests `google/gemma-4-31b-it:free`, matching the course's starting model and confirmed in OpenRouter's free tool-calling list on 2026-10-27 (see `docs/model_candidate.json`). This is a provisional feasibility choice, not a performance finding. `app.py models` obtains current metadata; the runtime verifies availability and zero pricing again. Before submission, record public tool-use benchmark evidence if available, exact effective model IDs, and the project's actual A/B scores. Those quality comparisons are **not yet measured**. Model substitution is explicit; both configurations must be rerun after substitution.
+The current model is **`nvidia/nemotron-3.5-lightning:free`**, selected explicitly after both Gemma candidates returned upstream-capacity HTTP 429 errors. A real pilot verified tool use at zero reported cost. The runtime checks current zero pricing and tool support before each session; there is no paid fallback. Model metadata is in `docs/model_candidate.json`; vendor benchmark evidence, the availability tradeoff and Arabic-language limitations are documented in [docs/model_rationale.md](docs/model_rationale.md). A pilot or vendor benchmark does not replace this project's A/B evaluation. Both configurations use the same concrete model.
+
+The provider paces requests at least 3.2 seconds apart. Free-account quota may require multiple sessions. Resume an incomplete v2 evaluation explicitly with:
+
+```bash
+uv run python -m evals.run --config A B --trials 1 --resume results/live/<run>
+```
+
+Resume validates the source/task hashes, model and configurations. Completed task trials, including behavioral failures, are retained. Infrastructure interruptions remain recorded separately and only the interrupted or unstarted trials are executed again. No partial suite is presented as complete.
 
 ## Design across the ladder
 
@@ -106,20 +114,24 @@ Actual provider usage is logged separately. Preflight token checks are deliberat
 
 Every task includes the course-standard `id`, `category`, `lang`, `prompt` and `graders` fields. The runner executes deterministic course `db` and `tool_called` graders, plus the stricter domain assertions in `expect`. It also supports `contains_any`, `not_contains` and `tool_not_called`. Database graders use read-only SQLite authorization. `turns` extends the format for follow-up tests; `prompt` is always the first turn. Use this repository's runner to preserve the synthetic profile, approval simulation and multi-turn state.
 
-| Config | Live pass rate | pass^k | Avg requests | Avg tokens |
-|---|---|---|---|---|
-| A | Not run — key/model required | Not measured | Not measured | Not measured |
-| B | Not run — key/model required | Not measured | Not measured | Not measured |
+**Partial live evidence only:** [run manifest](results/live/20261027T202626-453723/manifest.json), [A CSV](results/live/20261027T202626-453723/eval_A.csv), [B CSV](results/live/20261027T202626-453723/eval_B.csv), [partial summary](results/live/20261027T202626-453723/partial_summary.md).
 
-Local unit/integration results in `results/local/` are **not** model evaluation scores. No live `eval_A.csv` or `eval_B.csv` is fabricated. Running the suite produces separate CSVs, a version/hash manifest, per-task transcripts and `summary.md` under a new `results/live/<run>/` directory. `pass^k` is the fraction of tasks that passed **every observed trial**; k=1 does not establish repeated reliability. Provider caching/temperature can still affect independence; no statistical significance claim is made.
+| Config | Finished / planned | Passed among finished | Avg requests | Avg tokens |
+|---|---:|---:|---:|---:|
+| A | 6 / 20 | 5 / 6 (83.3%) | 4.50 | 10,654.2 |
+| B | 5 / 20 | 5 / 5 (100%) | 3.80 | 9,146.8 |
+
+These are unequal, search-only subsets, **not full-suite scores**. Among the five paired tasks, A passed 4/5 and B 5/5. One Arabic task flipped from failure to pass; one observed trial cannot establish that B caused an improvement. Full-suite pass^k is not reported. The interrupted B city-change trial is retained in the manifest and trace, outside the completed-row denominator. All observed completed rows reported USD 0 cost.
+
+Local unit/integration results in `results/local/` are **not** model evaluation scores. Running the suite produces real CSVs, a version/hash manifest and per-task transcripts under `results/live/<run>/`; `summary.md` is produced only on completion. `pass^k` is the fraction of tasks that passed **every observed trial**; k=1 does not establish repeated reliability. Provider caching/temperature can still affect independence; no statistical significance claim is made.
 
 ### Error analysis
 
-Pending live execution. The runner counts failed assertions and shows A→B flips in both directions. These are failure signals, **not inferred root causes**. Read the transcripts and complete [docs/error_analysis.md](docs/error_analysis.md) with causal explanations, counts, example IDs and fixes. Never invent an improvement to satisfy the rubric.
+The observed A Arabic failure returned prose instead of the required final JSON after correct search and eligibility calls. The conservative token-budget preflight then stopped the formatting repair. B returned valid JSON for that task, but its Arabic prose mixed English and used unclear GPA wording. See [docs/error_analysis.md](docs/error_analysis.md) for transcript-grounded analysis, the separate daily-quota interruption and the limitations of automatic grading. The remaining task categories have not yet been evaluated in this run.
 
 ## Security note
 
-See [SECURITY.md](SECURITY.md) for the trifecta, injected fixture, code defence, before/after contract replay, live experiment procedure, privacy boundary and residual risks. `results/security_replay/report.json` demonstrates that a worst-case malicious tool call can write in the deliberately unsafe test variant, is blocked by the protected variant, and legitimate approved writes still succeed. It is explicitly **not an LLM prompt-injection success measurement**. The live experiment is pending credentials.
+See [SECURITY.md](SECURITY.md) for the trifecta, injected fixture, code defence, before/after contract replay, live experiment procedure, privacy boundary and residual risks. `results/security_replay/report.json` demonstrates that a worst-case malicious tool call can write in the deliberately unsafe test variant, is blocked by the protected variant, and legitimate approved writes still succeed. It is explicitly **not an LLM prompt-injection success measurement**. The completed live experiment resisted the injection in both variants; only the separate forced-action replay reached and demonstrated the approval guard.
 
 ## Reproducibility and submission
 
@@ -131,7 +143,7 @@ See [SECURITY.md](SECURITY.md) for the trifecta, injected fixture, code defence,
 6. Run `uv run python scripts/readiness.py --require-live`; review the requirement matrix.
 7. Submit a shared/public repository or ZIP; never include `.env`, keys, `.venv` or private data.
 
-Automatic GitHub CI runs local contracts only. The separate live workflow requires an `OPENROUTER_API_KEY` repository secret. It can be manually dispatched with an explicit model ID, or triggered by committing a change to `.github/live-eval-request.json` after the secret is configured (the push trigger uses the concrete model ID specified in the workflow). Both paths revalidate that the model is free and supports tools. Each live run uploads its evidence as a GitHub Actions artifact; inspect the results and commit the completed CSVs, traces and analysis before submission. No live GitHub run is claimed yet.
+Automatic GitHub CI runs local contracts only. The separate live workflow requires an `OPENROUTER_API_KEY` repository secret. It can be manually dispatched with the model ID and `resume` set to `results/live/20261027T202626-453723`, or triggered by committing that resume path to `.github/live-eval-request.json` after configuring the secret and restoring quota. The push trigger uses the concrete model ID specified in the workflow. Both paths revalidate zero pricing and tool support. Each live run uploads evidence as a GitHub Actions artifact; inspect and commit it before submission. The current real-model evidence was executed locally. An earlier GitHub attempt stopped before model calls because its repository secret was missing.
 
 The course's published submission also includes slides/a live presentation. The project owner stated that their cohort does not require a presentation, so no slides are included. No change to the published grading weights is assumed.
 
@@ -143,7 +155,7 @@ The course's published submission also includes slides/a live presentation. The 
 - Session memory is in-process and resets on restart; drafts persist in local SQLite for live chat.
 - Matching enforces only modeled, published requirements. Unknown GPA/date/major fields remain unknown.
 - Exact domain labels/filters, a small catalog, limited attack coverage and simple automatic graders.
-- No operational deployment or verified live model performance yet. Larger data, robust authentication, retention policies and expanded evaluation are future work.
+- Incomplete live evaluation, one observed trial and search-only coverage so far; Arabic prose quality is not exhaustively graded. Larger data, robust authentication, retention policies and expanded evaluation are future work.
 
 ## Sources
 

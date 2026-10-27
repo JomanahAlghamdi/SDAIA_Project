@@ -1,0 +1,7 @@
+config,task_id,category,trial,passed,failed_graders,stopped,requests,tokens,cost_usd,seconds,effective_models,transcript
+A,search-ar-data-riyadh,search,1,False,completed;recommended_match,token_budget,5,12675,0.0,24.863,nvidia/nemotron-3.5-lightning:free,traces/search-ar-data-riyadh-A-0-attempt1-transcript.json
+A,search-ai-jeddah,search,1,True,,completed,4,8920,0.0,14.431,nvidia/nemotron-3.5-lightning:free,traces/search-ai-jeddah-A-0-attempt1-transcript.json
+A,search-summer-software,search,1,True,,completed,3,6447,0.0,9.931,nvidia/nemotron-3.5-lightning:free,traces/search-summer-software-A-0-attempt1-transcript.json
+A,search-business,search,1,True,,completed,4,9257,0.0,14.43,nvidia/nemotron-3.5-lightning:free,traces/search-business-A-0-attempt1-transcript.json
+A,search-remote,search,1,True,,completed,3,6790,0.0,11.339,nvidia/nemotron-3.5-lightning:free,traces/search-remote-A-0-attempt1-transcript.json
+A,search-change-city,search,1,True,,completed,8,19836,0.0,31.275,nvidia/nemotron-3.5-lightning:free,traces/search-change-city-A-0-attempt1-transcript.json

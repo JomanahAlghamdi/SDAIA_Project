@@ -9,6 +9,10 @@ on:
         description: "Concrete free OpenRouter tool-calling model ID"
         required: true
         type: string
+      resume:
+        description: "Optional existing results/live run directory to resume"
+        required: false
+        type: string
 permissions:
   contents: read
 jobs:
@@ -17,7 +21,8 @@ jobs:
     timeout-minutes: 30
     env:
       OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-      OPENROUTER_MODEL: ${{ inputs.model || 'google/gemma-4-31b-it:free' }}
+      OPENROUTER_MODEL: ${{ inputs.model || 'nvidia/nemotron-3.5-lightning:free' }}
+      EVAL_RESUME: ${{ inputs.resume }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -25,7 +30,20 @@ jobs:
           version: "0.13.4"
       - run: uv python install 3.12
       - run: uv sync --locked
-      - run: uv run python -m evals.run --config A B --trials 1
+      - run: |
+          uv run python - <<'PY'
+          import json, os, subprocess, sys
+          from pathlib import Path
+          request = Path('.github/live-eval-request.json')
+          resume = os.getenv('EVAL_RESUME') or (json.loads(request.read_text()).get('resume') if request.exists() else None)
+          command = [sys.executable, '-m', 'evals.run', '--config', 'A', 'B', '--trials', '1']
+          if resume:
+              path = Path(resume).resolve()
+              if not path.is_relative_to(Path('results/live').resolve()):
+                  raise SystemExit('Resume path must be inside results/live')
+              command += ['--resume', str(path)]
+          raise SystemExit(subprocess.run(command).returncode)
+          PY
       - run: uv run python -m evals.security --mode live
       - uses: actions/upload-artifact@v4
         if: always()

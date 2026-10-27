@@ -1,0 +1,3 @@
+{"time": 1793132229.492412, "event": "run_start", "config": "A", "profile_id": "S001", "history_kept": 0, "history_removed": 0}
+{"time": 1793132235.0725408, "event": "provider_error", "message": "Provider HTTP 429. Request stopped; no retry or fallback."}
+{"time": 1793132235.0727043, "event": "run_end", "stopped": "provider_error", "requests": 1, "tool_calls": 0}

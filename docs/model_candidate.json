@@ -1,7 +1,7 @@
 {
-  "id": "google/gemma-4-31b-it:free",
-  "name": "Google: Gemma 4 31B (free)",
-  "context_length": 262144,
+  "id": "nvidia/nemotron-3.5-lightning:free",
+  "name": "NVIDIA: Nemotron 3.5 Lightning (free)",
+  "context_length": 1000000,
   "pricing": {
     "prompt": "0",
     "completion": "0"
@@ -10,7 +10,6 @@
     "include_reasoning",
     "max_tokens",
     "reasoning",
-    "response_format",
     "seed",
     "temperature",
     "tool_choice",
@@ -18,19 +17,17 @@
     "top_p"
   ],
   "architecture": {
-    "modality": "text+image+video->text",
+    "modality": "text->text",
     "input_modalities": [
-      "image",
-      "text",
-      "video"
+      "text"
     ],
     "output_modalities": [
       "text"
     ],
-    "tokenizer": "Gemma",
+    "tokenizer": "Other",
     "instruct_type": null
   },
-  "checked_at": "2026-10-27T13:26:50.517535+00:00",
+  "checked_at": "2026-10-27T20:26:14.719937+00:00",
   "source": "https://openrouter.ai/api/v1/models",
-  "quality_evaluation": "PENDING; metadata is not performance evidence"
+  "quality_evaluation": "Pilot succeeded; see actual live evaluation evidence for measured suite results."
 }

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import asyncio
 import math
 import os
+import time
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 
@@ -57,6 +59,7 @@ class OpenRouter:
     def __init__(self, key: str | None = None, model: str | None = None):
         self.key = key or os.environ.get("OPENROUTER_API_KEY", "")
         self.model = model or os.environ.get("OPENROUTER_MODEL", "")
+        self.last_request_at = 0.0
         if not self.key:
             raise ProviderError("OPENROUTER_API_KEY is missing. Set it locally in .env; never commit or share it.")
         if not self.model:
@@ -74,6 +77,9 @@ class OpenRouter:
         await self.client.aclose()
 
     async def complete(self, messages: list[dict], tools: list[dict], max_tokens: int = 900) -> Completion:
+        # Respect free-tier pacing; this is not a retry and does not bypass quotas.
+        await asyncio.sleep(max(0.0, 3.2 - (time.monotonic() - self.last_request_at)))
+        self.last_request_at = time.monotonic()
         try:
             response = await self.client.post(API + "/chat/completions",
                 headers={"Authorization": "Bearer " + self.key, "X-Title": "Internship Finder synthetic capstone"},
@@ -84,6 +90,20 @@ class OpenRouter:
             raise ProviderError("Provider connection/timeout error. Request stopped; no retry or fallback.") from None
         if response.status_code != 200:
             # Never log provider response bodies, headers or credentials.
+            if response.status_code == 429:
+                category = "unspecified rate limit"
+                try:
+                    error = response.json().get("error", {})
+                    description = (str(error.get("message", "")) + " " + str(error.get("metadata", {}).get("raw", ""))).lower()
+                    if any(term in description for term in ("free-models-per-day", "daily", "per day", "today")):
+                        category = "daily account quota"
+                    elif "upstream" in description:
+                        category = "upstream model capacity"
+                    elif any(term in description for term in ("per-minute", "per minute", "rpm")):
+                        category = "per-minute request limit"
+                except (ValueError, AttributeError, TypeError):
+                    pass
+                raise ProviderError(f"Provider HTTP 429 ({category}). Request stopped; no retry or fallback.")
             raise ProviderError(f"Provider HTTP {response.status_code}. Request stopped; no retry or fallback.")
         try:
             body = response.json()

@@ -41,7 +41,10 @@ class CatalogBridge:
             raise
 
     async def __aexit__(self, *args):
-        return await self.stack.__aexit__(*args)
+        # Close SDK task groups normally so an exception from the caller's body
+        # remains its original type instead of being wrapped in ExceptionGroup.
+        await self.stack.aclose()
+        return False
 
     async def call(self, name: str, arguments: dict) -> dict:
         if name not in self.tools:

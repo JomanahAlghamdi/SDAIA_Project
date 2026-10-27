@@ -37,3 +37,19 @@ async def test_provider_errors_never_invent_usage_or_echo_body(status, body):
         with pytest.raises(ProviderError) as exc:
             await provider.complete([], [])
         assert "secret" not in str(exc.value) and "synthetic-test-key" not in str(exc.value)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("message,category", [
+    ("free-models-per-day quota reached", "daily account quota"),
+    ("temporarily rate-limited upstream", "upstream model capacity"),
+    ("requests per minute exceeded", "per-minute request limit"),
+])
+async def test_rate_limit_category_without_raw_error_disclosure(message, category):
+    provider = OpenRouter(key="synthetic-test-key", model="test/model:free")
+    payload = {"error": {"message": message + " private-provider-detail"}}
+    async with httpx.AsyncClient(transport=httpx.MockTransport(lambda _: httpx.Response(429, json=payload))) as client:
+        provider.client = client
+        with pytest.raises(ProviderError) as exc:
+            await provider.complete([], [])
+        assert category in str(exc.value) and "private-provider-detail" not in str(exc.value)

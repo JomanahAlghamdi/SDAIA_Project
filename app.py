@@ -97,7 +97,7 @@ async def chat(args):
                 print("مسودات محلية فقط؛ لم يتم إرسال أي طلب / Local drafts only; no application sent.")
                 print(f"[{run.stopped}; requests={run.requests}; tokens={run.prompt_tokens + run.completion_tokens}; cost=${run.cost_usd:.6f}]")
                 if args.command == "ask":
-                    break
+                    return 0 if run.stopped == "completed" else 2
     finally:
         store.close()
 
@@ -133,12 +133,12 @@ async def main():
                               "key_present": bool(os.getenv("OPENROUTER_API_KEY")),
                               "model_configured": bool(os.getenv("OPENROUTER_MODEL"))}, indent=2))
     else:
-        await chat(args)
+        return await chat(args)
 
 
 if __name__ == "__main__":
     try:
-        asyncio.run(main())
+        raise SystemExit(asyncio.run(main()) or 0)
     except (ProviderError, ValueError) as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(2)

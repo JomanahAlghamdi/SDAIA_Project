@@ -7,8 +7,15 @@ from finder.agent import Agent, Limits
 from finder.catalog import Catalog, load_student
 from finder.harness import Harness, Trace
 from finder.mcp_client import CatalogBridge
-from finder.provider import Completion, ReplayProvider, scripted_call, scripted_final
+from finder.provider import Completion, ReplayProvider, ProviderError, scripted_call, scripted_final
 from finder.storage import DraftStore
+
+
+@pytest.mark.asyncio
+async def test_mcp_cleanup_preserves_provider_error():
+    with pytest.raises(ProviderError, match="quota fixture"):
+        async with CatalogBridge(date(2026, 10, 27)):
+            raise ProviderError("quota fixture")
 
 
 @pytest.mark.asyncio

@@ -1,7 +1,7 @@
 {
   "local_contracts": {
     "passed": true,
-    "test_count": 67,
+    "test_count": 73,
     "evidence": "results/local/tests.xml"
   },
   "tools_and_mcp": "implemented; see real MCP integration tests and doctor output",
@@ -14,7 +14,7 @@
   },
   "live_attack_before_after": {
     "verified": false,
-    "evidence": null
+    "evidence": "results/security_live/report.json"
   },
   "root_cause_analysis": {
     "pending_marker_removed": false,

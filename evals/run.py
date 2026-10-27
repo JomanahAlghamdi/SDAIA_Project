@@ -5,6 +5,7 @@ import asyncio
 import csv
 import hashlib
 import json
+import os
 import platform
 import sys
 import tempfile
@@ -50,17 +51,26 @@ def hashes():
 async def evaluate(args):
     tasks = load_tasks(args.tasks)
     args.out.mkdir(parents=True, exist_ok=True)
-    # Each invocation creates a new directory. Never silently overwrites or mixes releases.
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
-    out = args.out / (stamp + "-" + str(time.time_ns())[-6:])
-    out.mkdir()
-    manifest = {"status": "not_started", "mode": "live_openrouter", "configurations": args.config,
+    rows = []
+    task_digest = hashlib.sha256(args.tasks.read_bytes()).hexdigest()
+    if args.resume:
+        out = args.resume
+        manifest, rows = resume_state(out, args.config, args.trials, tasks, task_digest, os.getenv("OPENROUTER_MODEL", ""))
+    else:
+        out = args.out / (stamp + "-" + str(time.time_ns())[-6:])
+        out.mkdir()
+        manifest = {"schema_version": 2, "status": "not_started", "mode": "live_openrouter", "configurations": args.config,
                 "task_count": len(tasks), "trials": args.trials, "python": platform.python_version(),
-                "hashes": hashes(), "rows": 0, "cache": "no application response cache", "approval": "explicit per-task simulated human decisions; isolated synthetic DB"}
+                "hashes": hashes(), "task_file_sha256": task_digest, "rows": 0, "attempts": [], "provider_interruptions": [],
+                "cache": "no application response cache; explicit resume retains completed task trials (including behavioral failures)",
+                "approval": "explicit per-task simulated human decisions; isolated synthetic DB"}
+    manifest.setdefault("attempts", []).append({"started_at": stamp, "completed_rows_at_start": len(rows)})
+    attempt = len(manifest["attempts"])
+    completed = {(r["config"], r["task_id"], r["trial"]) for r in rows}
     def write_manifest():
         (out / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     write_manifest()
-    rows = []
     try:
         async with OpenRouter() as provider:
             manifest.update(status="running", requested_model=provider.model)
@@ -70,6 +80,8 @@ async def evaluate(args):
                 for trial in range(args.trials):
                     for task in tasks:
                         for config in args.config:
+                            if (config, task["id"], trial + 1) in completed:
+                                continue
                             started = time.monotonic()
                             with tempfile.TemporaryDirectory(prefix="if-eval-") as tmp:
                                 store = DraftStore(Path(tmp) / "test.sqlite")
@@ -77,7 +89,8 @@ async def evaluate(args):
                                     raw = load_student(task["student"]).model_dump(mode="json")
                                     raw.update(task.get("profile_overrides", {}))
                                     approved = set(task.get("approved_opportunity_ids", []))
-                                    trace = Trace(out / "traces" / f"{task['id']}-{config}-{trial}.jsonl")
+                                    trace_name = f"{task['id']}-{config}-{trial}-attempt{attempt}"
+                                    trace = Trace(out / "traces" / (trace_name + ".jsonl"))
                                     harness = Harness(Student.model_validate(raw), Catalog(), bridge, store,
                                         approve=lambda preview: preview["opportunity_id"] in approved,
                                         today=date.fromisoformat(task["as_of"]), trace=trace)
@@ -96,23 +109,27 @@ async def evaluate(args):
                                            "tokens": sum(r.prompt_tokens + r.completion_tokens for r in runs),
                                            "cost_usd": sum(r.cost_usd for r in runs),
                                            "seconds": round(time.monotonic() - started, 3),
-                                           "effective_models": ";".join(sorted({m for r in runs for m in r.models}))}
+                                           "effective_models": ";".join(sorted({m for r in runs for m in r.models})),
+                                           "transcript": "traces/" + trace_name + "-transcript.json"}
+                                    (out / row["transcript"]).write_text(
+                                        json.dumps({"graders": checks, "turns": [r.transcript for r in runs]}, ensure_ascii=False, indent=2), encoding="utf-8")
+                                    if row["stopped"] in {"provider_error", "unexpected_provider_cost", "cost_budget"}:
+                                        manifest["provider_interruptions"].append(row)
+                                        write_manifest()
+                                        raise ProviderError("Provider or cost-policy failure. Interrupted trial retained separately; resume explicitly after resolving it.")
                                     rows.append(row)
                                     with (out / f"eval_{config}.csv").open("a", newline="", encoding="utf-8") as f:
                                         writer = csv.DictWriter(f, fieldnames=list(row))
                                         if f.tell() == 0:
                                             writer.writeheader()
                                         writer.writerow(row)
-                                    (out / "traces" / f"{task['id']}-{config}-{trial}-transcript.json").write_text(
-                                        json.dumps({"graders": checks, "turns": [r.transcript for r in runs]}, ensure_ascii=False, indent=2), encoding="utf-8")
                                     manifest["rows"] = len(rows)
                                     write_manifest()
                                     print(f"{config} trial={trial + 1} {task['id']}: {'PASS' if row['passed'] else 'FAIL ' + row['failed_graders']}", flush=True)
-                                    if row["stopped"] in {"provider_error", "unexpected_provider_cost", "cost_budget"}:
-                                        raise ProviderError("Provider or cost-policy failure during evaluation. Partial results retained; rerun explicitly after resolving it.")
                                 finally:
                                     store.close()
             manifest["status"] = "complete"
+            manifest.pop("reason", None)
     except ProviderError as exc:
         manifest["status"] = "blocked" if not rows else "incomplete"
         manifest["reason"] = str(exc)
@@ -123,6 +140,41 @@ async def evaluate(args):
     summarize(rows, out, args.trials)
     print("Actual live results:", out)
     return 0
+
+
+def resume_state(out, configs, trials, tasks, task_digest, model):
+    manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
+    required = {"schema_version": 2, "mode": "live_openrouter", "configurations": configs,
+                "trials": trials, "task_count": len(tasks), "task_file_sha256": task_digest,
+                "hashes": hashes(), "requested_model": model}
+    if manifest.get("status") not in {"incomplete", "blocked"} or any(manifest.get(k) != v for k, v in required.items()):
+        raise ValueError("Resume requires matching source, tasks, model, configurations and trials, and an incomplete v2 run")
+    rows, seen = [], set()
+    ids = {t["id"] for t in tasks}
+    for config in configs:
+        path = out / f"eval_{config}.csv"
+        if not path.exists():
+            continue
+        with path.open(encoding="utf-8", newline="") as f:
+            for row in csv.DictReader(f):
+                for key in ("trial", "requests", "tokens"):
+                    row[key] = int(row[key])
+                for key in ("cost_usd", "seconds"):
+                    row[key] = float(row[key])
+                if row["passed"] not in {"True", "False"}:
+                    raise ValueError("Invalid CSV pass value")
+                row["passed"] = row["passed"] == "True"
+                key = (row["config"], row["task_id"], row["trial"])
+                transcript = (out / row["transcript"]).resolve()
+                if (key in seen or row["config"] != config or row["task_id"] not in ids
+                        or not 1 <= row["trial"] <= trials or row["stopped"] in {"provider_error", "unexpected_provider_cost", "cost_budget"}
+                        or not transcript.is_relative_to(out.resolve()) or not transcript.is_file()):
+                    raise ValueError("Invalid or duplicate completed trial during resume")
+                seen.add(key)
+                rows.append(row)
+    if len(rows) != manifest["rows"]:
+        raise ValueError("CSV/manifest row count mismatch; do not resume damaged evidence")
+    return manifest, rows
 
 
 def summarize(rows, out, trials):
@@ -161,10 +213,14 @@ def main():
     parser.add_argument("--config", nargs="+", choices=["A", "B"], default=["A", "B"])
     parser.add_argument("--trials", type=int, default=1)
     parser.add_argument("--out", type=Path, default=ROOT / "results/live")
+    parser.add_argument("--resume", type=Path, help="Resume an incomplete v2 run only with identical source, tasks and model")
     args = parser.parse_args()
     if args.trials < 1 or len(set(args.config)) != len(args.config):
         parser.error("Trials must be positive and configurations unique")
-    return asyncio.run(evaluate(args))
+    try:
+        return asyncio.run(evaluate(args))
+    except ValueError as exc:
+        parser.error(str(exc))
 
 
 if __name__ == "__main__":

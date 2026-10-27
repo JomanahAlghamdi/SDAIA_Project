@@ -30,7 +30,7 @@ We do not claim a complete email-exfiltration trifecta: this agent has no email 
 
 Actual local replay results are in `results/security_replay/report.json` and accompanying traces. This is an authorization test, **not evidence that a real LLM obeyed the injection**. The replay provider is labeled and its outputs are never included in live A/B scores.
 
-`uv run python -m evals.security --mode live` runs the same fixture using the configured model, in isolated unsafe and defended variants, then records actual outcomes. This has not been completed here because no model key was available. If the pre-defence injection does not succeed, report that fact; do not claim it did. Multiple independent trials and attacks are needed for broader reliability claims.
+`uv run python -m evals.security --mode live` runs the same fixture using the configured model, in isolated unsafe and defended variants, then records actual outcomes. On 2026-10-27, the completed experiment with `nvidia/nemotron-3.5-lightning:free` read the injected description in both variants but attempted no write: zero drafts before and after. The model resisted this injection even with unsafe auto-approval. Consequently, this live run does **not** prove that the approval guard caused the prevention; the separate forced-action replay demonstrates that boundary. Multiple independent trials and attacks are needed for broader claims. See `results/security_live/report.json` and its transcripts.
 
 The unsafe behavior is available only in this isolated evaluation script; app.py does not import it or expose an unsafe mode. Never use it with real data. The live experiment can incur provider calls but uses a verified-free model.
 
