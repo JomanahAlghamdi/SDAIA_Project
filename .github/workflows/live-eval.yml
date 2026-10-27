@@ -8,13 +8,18 @@ on:
       model:
         description: "Concrete free OpenRouter tool-calling model ID"
         required: true
+        default: "nvidia/nemotron-3.5-lightning:free"
         type: string
       resume:
         description: "Optional existing results/live run directory to resume"
         required: false
+        default: "results/live/20261027T202626-453723"
         type: string
 permissions:
   contents: read
+concurrency:
+  group: live-model-evaluation
+  cancel-in-progress: false
 jobs:
   live:
     runs-on: ubuntu-latest
@@ -25,17 +30,26 @@ jobs:
       EVAL_RESUME: ${{ inputs.resume }}
     steps:
       - uses: actions/checkout@v4
+      - name: Check repository secret
+        run: |
+          python - <<'PY'
+          import os
+          if not os.environ.get('OPENROUTER_API_KEY'):
+              raise SystemExit('OPENROUTER_API_KEY is missing from repository Actions secrets. Add it in Settings > Secrets and variables > Actions, then run this workflow again. Never put the key in a workflow input or source file.')
+          print('OpenRouter repository secret is configured; its value is not displayed.')
+          PY
       - uses: astral-sh/setup-uv@v6
         with:
           version: "0.13.4"
       - run: uv python install 3.12
       - run: uv sync --locked
-      - run: |
+      - name: Resume or start actual A/B evaluation
+        run: |
           uv run python - <<'PY'
           import json, os, subprocess, sys
           from pathlib import Path
           request = Path('.github/live-eval-request.json')
-          resume = os.getenv('EVAL_RESUME') or (json.loads(request.read_text()).get('resume') if request.exists() else None)
+          resume = os.getenv('EVAL_RESUME') if os.getenv('GITHUB_EVENT_NAME') == 'workflow_dispatch' else (json.loads(request.read_text()).get('resume') if request.exists() else None)
           command = [sys.executable, '-m', 'evals.run', '--config', 'A', 'B', '--trials', '1']
           if resume:
               path = Path(resume).resolve()
@@ -44,9 +58,34 @@ jobs:
               command += ['--resume', str(path)]
           raise SystemExit(subprocess.run(command).returncode)
           PY
+      - name: Preserve previous live security evidence
+        run: |
+          uv run python - <<'PY'
+          import os, shutil
+          from pathlib import Path
+          previous = Path('results/security_live')
+          archive = Path('results/security_attempts') / ('github-' + os.environ['GITHUB_RUN_ID'] + '-previous')
+          if previous.exists():
+              shutil.copytree(previous, archive, dirs_exist_ok=True)
+          PY
       - run: uv run python -m evals.security --mode live
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: live-evaluation-evidence
           path: results/
+      - name: Explain evidence status
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          lines = ['## Internship Finder evaluation', '', 'Existing evidence is included in the artifact even if this attempt stops. An artifact alone does not mean the suite is complete.', '']
+          for path in sorted(Path('results/live').glob('*/manifest.json')):
+              data = json.loads(path.read_text())
+              planned = data.get('task_count', 0) * data.get('trials', 0) * len(data.get('configurations', []))
+              lines.append(f"- `{path.parent}`: **{data.get('status')}**, {data.get('rows', 0)}/{planned} finished task trials.")
+          lines += ['', 'A green workflow means its commands completed, not that every evaluated task passed. Review CSVs and transcripts, then commit the evidence and update README/error analysis before submission.', '', 'Arabic guide: [SUBMISSION_AR.md](https://github.com/JomanahAlghamdi/SDAIA_Project/blob/main/SUBMISSION_AR.md)']
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('\n'.join(lines) + '\n')
+          PY

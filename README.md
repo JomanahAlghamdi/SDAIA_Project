@@ -9,6 +9,8 @@ An Arabic/English agent that helps university students find suitable synthetic c
 
 Start in Arabic: [START_HERE_AR.md](START_HERE_AR.md). Exact requirement evidence: [docs/requirements.md](docs/requirements.md).
 
+Step-by-step Arabic instructions for GitHub evaluation, Windows execution and handing in the repository: [SUBMISSION_AR.md](SUBMISSION_AR.md).
+
 Repository: [JomanahAlghamdi/SDAIA_Project](https://github.com/JomanahAlghamdi/SDAIA_Project). [Local CI](https://github.com/JomanahAlghamdi/SDAIA_Project/actions/workflows/checks.yml) runs tests, real MCP connectivity and the security replay on every push. A green local CI result does not establish live model evaluation readiness.
 
 Detailed Arabic submission review: [docs/FINAL_REVIEW_AR.md](docs/FINAL_REVIEW_AR.md).

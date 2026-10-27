@@ -1,0 +1,35 @@
+SCRIPTED TOOL DEMO — NO LLM. Automated CLI input: NO. Temporary synthetic database.
+
+
+مراجعة مسودة محلية — لم يتم إرسال أي طلب / LOCAL DRAFT PREVIEW
+{
+  "student_id": "S001",
+  "opportunity_id": "OP001",
+  "company": "Synthetic Company 01",
+  "title": "Data Co-op 01",
+  "training_kind": "coop",
+  "duration_months": 6,
+  "start_date": "2027-01-15",
+  "status": "Draft",
+  "synthetic": true,
+  "sent_to_employer": false
+}
+حفظ هذه المسودة؟ اكتب YES أو نعم / Approve this exact draft? [no]: {
+  "mode": "offline_scripted_not_llm",
+  "stopped": "completed",
+  "mcp_tools": [
+    "search_opportunities",
+    "get_opportunity_details"
+  ],
+  "mcp_calls": [
+    "search_opportunities",
+    "get_opportunity_details"
+  ],
+  "save_results": [
+    {
+      "status": "denied",
+      "saved": false
+    }
+  ],
+  "draft_count": 0
+}
