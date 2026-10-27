@@ -1,0 +1,36 @@
+{
+  "review_date": "2026-10-27",
+  "repository": "JomanahAlghamdi/SDAIA_Project",
+  "verified_code_commit": "d0fdee4e5e97e0d91e55069b121a4d46c9c46d21",
+  "local_contract_ci": {
+    "run_id": 40574061261,
+    "job_id": 122435656429,
+    "url": "https://github.com/JomanahAlghamdi/SDAIA_Project/actions/runs/40574061261",
+    "conclusion": "success",
+    "tests_passed": 67,
+    "mcp_search_ok": true,
+    "security_replay_unauthorized_drafts_before": 1,
+    "security_replay_unauthorized_drafts_after": 0
+  },
+  "live_evaluation_attempt": {
+    "run_id": 40574061210,
+    "job_id": 122435656784,
+    "url": "https://github.com/JomanahAlghamdi/SDAIA_Project/actions/runs/40574061210",
+    "conclusion": "failure",
+    "evaluation_status": "blocked",
+    "reason": "OPENROUTER_API_KEY is missing",
+    "manifest_path_in_artifact": "live/20261027T200000-332271/manifest.json",
+    "live_security_step": "skipped",
+    "artifact_id": 12765851988,
+    "artifact_name": "live-evaluation-evidence",
+    "artifact_sha256": "139de05e9949d42c8c2bf47549f0c57d547c356a7a67d3412ef9a24a24595b8e"
+  },
+  "final_submission_ready": false,
+  "remaining": [
+    "Configure the OpenRouter repository secret without committing its value",
+    "Complete both live evaluation configurations and commit actual CSVs and transcripts",
+    "Run and interpret the live security experiment",
+    "Complete root-cause analysis, README metrics and model rationale",
+    "Confirm the cohort presentation exemption"
+  ]
+}

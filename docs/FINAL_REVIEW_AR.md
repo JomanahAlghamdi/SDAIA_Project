@@ -4,6 +4,8 @@
 
 المصدر: [متطلبات المشروع الرسمية](https://github.com/SDAIAAcademy/agentic-ai/blob/main/labs/capstone/README.md) و[قالب README](https://github.com/SDAIAAcademy/agentic-ai/blob/main/labs/capstone/TEMPLATE_README.md)، تمت مراجعتهما في 27 أكتوبر 2026. المسار المختار: **Track 2 — Your harness**.
 
+**نتيجة التنفيذ على GitHub:** نجحت الاختبارات الـ67 واتصال MCP واختبار الموافقة في [تشغيل الاختبارات](https://github.com/JomanahAlghamdi/SDAIA_Project/actions/runs/40574061261). بدأت [محاولة التقييم الحقيقي](https://github.com/JomanahAlghamdi/SDAIA_Project/actions/runs/40574061210)، لكنها توقفت عند `OPENROUTER_API_KEY is missing`؛ لم تبدأ مقارنة A/B، وتم تخطي التجربة الأمنية الحية. هذا دليل على نقص الإعداد المطلوب، وليس نتيجة لقياس دقة النموذج. [سجل المراجعة](../results/github/compliance_review.json) يحدد نسخة الكود وأرقام التشغيل.
+
 | الشرط | الموجود فعليًا | الحكم |
 |---|---|---|
 | وكيل ينفذ مهمة متعددة الخطوات بثلاث أدوات على الأقل | أربع أدوات: بحث، تفاصيل، فحص أهلية، حفظ مسودة | التنفيذ موجود ومختبر بتسلسل تجريبي؛ أداء النموذج الحقيقي ينتظر التشغيل |
