@@ -1,38 +1,44 @@
 # Course requirement → implementation → evidence
 
-Authority: [official capstone requirements](https://github.com/SDAIAAcademy/agentic-ai/blob/main/labs/capstone/README.md), [README template](https://github.com/SDAIAAcademy/agentic-ai/blob/main/labs/capstone/TEMPLATE_README.md), [Day 5 scoring guide](https://sdaiaacademy.github.io/agentic-ai/slides/day5.html). Reviewed 2026-10-27. The project follows Track 2.
+Authority: [capstone requirements](https://github.com/SDAIAAcademy/agentic-ai/blob/main/labs/capstone/README.md), [README template](https://github.com/SDAIAAcademy/agentic-ai/blob/main/labs/capstone/TEMPLATE_README.md), [Day 5 rubric](https://sdaiaacademy.github.io/agentic-ai/slides/day5.html). Track 2.
 
-“Implemented” describes source code. “Verified locally” describes actual non-LLM tests. Neither label substitutes for the required live A/B evaluation.
+The submitted technical evidence is complete. The final suite contains 20 tasks × 2 configurations, one trial each. A passed 16/20; B passed 20/20 on the automatic checks. Manual prose defects remain documented. [Machine checklist](../results/requirements_status.json) is not an academic grade or a universal accuracy guarantee.
 
-| Requirement | Implementation | Evidence/status |
+| Requirement | Implementation | Actual evidence |
 |---|---|---|
-| Multi-step agent, ≥3 tools | `finder/agent.py`, four strict tools in `finder/models.py` | Four-tool integration tested; real LLM search/detail/eligibility sequences observed in partial A/B traces |
-| ≥1 exposed/consumed MCP tool | Search and details via separate `mcp_server.py`, `finder/mcp_client.py` | Real SDK initialization/list/call tests; `app.py doctor` |
-| Context file | `prompts/system.md` loaded per run; B extra instruction separate | Runtime and manifest hashes; no unused spec file |
-| Memory or retrieval | Structured profile, last search and bounded conversation pairs; catalog retrieval | Runtime tests, multi-turn live tasks ready |
-| Compaction or context budget | Last 12 messages (6 complete user/assistant pairs), cap on results, byte-based conservative token bound | `finder/agent.py`; budget/memory tests |
-| Permission policy and human approval for a write | Read allowlist; exact-preview host callback; one-use content-bound approval; atomic SQLite commit | `tests/test_approvals.py`; interactive demo; no LLM-supplied approval field |
-| Step and cost budgets | 8 model calls/20 tool calls; token/cost meters and pre/post checks; verified-free routing | Local tests and actual live usage/stop traces; A Arabic task hit the conservative token preflight; reported cost zero |
-| ≥15 eval tasks with automatic graders | 20 task objects; output/tool/constraint/DB/approval graders | `tasks.jsonl`, `evals/graders.py`; fixture coverage tests |
-| Two configurations actually evaluated | A base prompt; B one added verification instruction; same data/tools/model | **PARTIAL:** 6/20 A and 5/20 B trials saved in `results/live/20261027T202626-453723`; daily account quota stopped execution; 29 remain |
-| Error analysis | Transcript-grounded JSON/budget failure analysis, paired comparison and quota interruption | Partial analysis in `docs/error_analysis.md`; final analysis awaits the full suite |
-| Security note/trifecta | Data boundaries, untrusted descriptions, model egress, minimization and oversight | `SECURITY.md` |
-| Attack and defence | OP030 injection; isolated unsafe test variant versus approval gate | Forced-action replay: 1 unsafe write, 0 defended, valid benign control. Live experiment completed: model resisted both variants, so the guard was not reached; causal live defence remains unverified |
-| Logs/traces and operability | Tool results, approvals, guard blocks, usage and stop reasons; clean failure paths | Actual local traces; provider/limit tests; no automatic paid fallback |
-| README from template | Problem/run/design/tools/eval/security/limits sections; architecture diagram | `README.md`, `docs/architecture.md`; partial scores and `docs/model_rationale.md` distinguish external benchmarks from own results |
-| Runnable via uv + OpenRouter key | Pinned `pyproject.toml`/`uv.lock`, `.env.example`, CLI | 73 local tests and real model pilot; full evaluation blocked by daily quota, not authentication |
-| Synthetic or public data only | 30 clearly labeled fake companies/opportunities, 6 fake academic profiles | `scripts/generate_data.py`, validated JSON fixtures |
-| No secrets in repository | `.env` and runtime DB excluded; only `.env.example`; credentials not sent to MCP | Package content/secret scan; provider errors redact response bodies |
-| Slides/presentation | Excluded per project owner's instruction | Published requirement remains; no claim that grading weights changed |
+| Multi-step agent, ≥3 tools | Agent loop; four strict tools | Real-model search, eligibility and draft conversations in `results/live/20261027T202626-453723/traces` |
+| ≥1 MCP tool | Search/details over separate stdio MCP process | Real SDK integration tests and live traces |
+| Context file | `prompts/system.md`; one B instruction in `prompts/config_b.txt` | Loaded in each request; hashed in the manifest |
+| Memory/retrieval | Scoped student profile, last search, six complete conversation pairs, catalog retrieval | Two multi-turn tasks passed for both configurations |
+| Compaction/context budget | Old complete pairs removed; tool-result cap; conservative input bound | Runtime tests and actual A token-budget stop |
+| Permissions and approved write | Host-only one-use content-bound consent; recheck before SQLite commit | Live approved/denied/duplicate tasks passed under both configurations; approval unit tests |
+| Step/cost budgets | 8 model calls / 20 tools per request; token and cost checks; verified-free provider | Actual usage records and local budget tests; no paid fallback |
+| ≥15 automatically graded tasks | 20 tasks across 5 categories; course-standard fields and executable graders | `tasks.jsonl`, `evals/graders.py`; 40 actual trials |
+| Two configurations evaluated | A base prompt; B one verification instruction; same model/runtime/data | Complete manifest, 20 rows each in `eval_A.csv` / `eval_B.csv` |
+| Error analysis | Causal transcript review, paired flips and manually found grader gaps | `docs/error_analysis.md`; four A failures and ungraded prose/language defects |
+| Security note/trifecta | Private academic context, untrusted catalog text, model API egress | `SECURITY.md`, synthetic data and scoped tools |
+| Attack and defence | Live injection observation plus independent forced-action authorization experiment | Live model resisted both variants; replay unsafe=1/defended=0; benign control succeeded; live denial cases also reached the guard |
+| Logs/operability | Usage, tool calls/results, approvals, stop reasons, bounded errors, explicit resume | Complete traces, retained quota interruption, 87 passing local tests |
+| README/reproducibility | Problem, run instructions, ladder, tools, results, security, limits, diagram | README, `uv.lock`, Arabic walkthrough, scripted approval/denial demonstration |
+| Synthetic/public data only | 30 fake opportunities and 6 fake profiles | Validated JSON fixtures; no real employer submission |
+| No secrets in repository | `.env`/runtime excluded; key not forwarded to MCP | Repository secret scan; temporary local credential deleted after use |
+| Repository/ZIP | Public GitHub repository; Download ZIP supported | Code, tasks, CSVs, traces, security and documentation committed |
+| Slides/presentation | Excluded per project owner's cohort instructions | Still present in the published rubric; no claim of changed grading weights |
+
+## Evidence interpretation
+
+The course does not require manufacturing a successful live model compromise. This project reports live resistance to the attempted injection and separately demonstrates the code guard stopping the requested malicious action. Live guard causality for that specific injection remains **unverified**, not silently inferred. Broader robustness needs more attacks and trials.
+
+The read-only readiness checker and its own test changed after the full evaluation. Only `scripts/readiness.py` and `tests/test_readiness.py` are excluded from experiment-source compatibility; runtime, prompt, data, dependency, grader and evaluation-runner hashes must match. Original full manifests are preserved. Local verification requires exact current full hashes.
 
 ## Published rubric
 
 | Criterion | Weight |
 |---|---:|
 | Working system/live demonstration | 25% |
-| Context/harness engineering choices | 25% |
+| Context/harness engineering | 25% |
 | Evaluation/error analysis | 20% |
 | Security/governance/operability | 20% |
 | Presentation/reproducibility | 10% |
 
-Before submission, complete the **pending live evidence** and inspect all failures. Passing local tests is not a promise of model accuracy or course completion. Run `uv run python scripts/readiness.py` for machine-readable status.
+Run `uv run python scripts/readiness.py --require-live`, and manually review actual results and cohort submission rules. A score of 100% on B's small automatic suite does not mean all its prose is correct or that academic acceptance is guaranteed.

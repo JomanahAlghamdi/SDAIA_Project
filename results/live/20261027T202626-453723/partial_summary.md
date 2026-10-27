@@ -1,3 +1,5 @@
+> Historical checkpoint at 11/40 trials. The run has since completed; use [summary.md](summary.md) for final scores.
+
 # Partial live evaluation — not a complete suite
 
 Run: `20261027T202626-453723`. Model: `nvidia/nemotron-3.5-lightning:free`. One trial per task/configuration.

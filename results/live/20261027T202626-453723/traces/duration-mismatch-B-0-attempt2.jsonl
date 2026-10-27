@@ -1,0 +1,6 @@
+{"time": 1793135152.7987266, "event": "run_start", "config": "B", "profile_id": "S001", "history_kept": 0, "history_removed": 0}
+{"time": 1793135154.7010655, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 1778, "completion_tokens": 130, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 6539}
+{"time": 1793135154.701289, "event": "tool_call", "tool": "check_eligibility", "arguments": {"opportunity_id": "OP009"}, "transport": "local"}
+{"time": 1793135154.7013447, "event": "tool_result", "tool": "check_eligibility", "result": {"opportunity_id": "OP009", "status": "ineligible", "passed": ["major", "year", "training_kind", "available_from", "gpa"], "failures": ["required_months_mismatch"], "missing": [], "notice": "Preliminary match to synthetic published requirements; not employer acceptance."}}
+{"time": 1793135162.3559654, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 1904, "completion_tokens": 702, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 7166}
+{"time": 1793135162.3561862, "event": "run_end", "stopped": "completed", "requests": 2, "tool_calls": 1}

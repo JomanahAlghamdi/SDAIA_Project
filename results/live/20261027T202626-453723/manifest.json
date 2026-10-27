@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "status": "incomplete",
+  "status": "complete",
   "mode": "live_openrouter",
   "configurations": [
     "A",
@@ -45,11 +45,15 @@
     "tests/test_security_evidence.py": "e10c8fb1ba7faa965632b521eaeee14b705a09c3a54760852a82848c7ae86dfb"
   },
   "task_file_sha256": "787b2eb795b746fb15af9fa82adc676abb9b2c6c1c688b21ef00a180d88237c4",
-  "rows": 11,
+  "rows": 40,
   "attempts": [
     {
       "started_at": "20261027T202626",
       "completed_rows_at_start": 0
+    },
+    {
+      "started_at": "20261027T210117",
+      "completed_rows_at_start": 11
     }
   ],
   "provider_interruptions": [
@@ -71,6 +75,5 @@
   ],
   "cache": "no application response cache; explicit resume retains completed task trials (including behavioral failures)",
   "approval": "explicit per-task simulated human decisions; isolated synthetic DB",
-  "requested_model": "nvidia/nemotron-3.5-lightning:free",
-  "reason": "Provider or cost-policy failure. Interrupted trial retained separately; resume explicitly after resolving it."
+  "requested_model": "nvidia/nemotron-3.5-lightning:free"
 }

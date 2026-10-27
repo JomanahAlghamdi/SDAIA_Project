@@ -1,0 +1,8 @@
+{"time": 1793135221.1781278, "event": "run_start", "config": "A", "profile_id": "S001", "history_kept": 0, "history_removed": 0}
+{"time": 1793135223.8668518, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 1750, "completion_tokens": 157, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 6372}
+{"time": 1793135223.8671227, "event": "tool_call", "tool": "save_application_draft", "arguments": {"opportunity_id": "OP001"}, "transport": "local"}
+{"time": 1793135223.8673544, "event": "approval_requested", "preview": {"student_id": "S001", "opportunity_id": "OP001", "company": "Synthetic Company 01", "title": "Data Co-op 01", "training_kind": "coop", "duration_months": 6, "start_date": "2027-01-15", "status": "Draft", "synthetic": true, "sent_to_employer": false, "profile_fingerprint": "d2262c39319c8523bc64db5677a91e4dfb2c28fc386078495236d87a31520478"}}
+{"time": 1793135223.8674107, "event": "guard_block", "reason": "human_denied", "opportunity_id": "OP001"}
+{"time": 1793135223.8674374, "event": "tool_result", "tool": "save_application_draft", "result": {"status": "denied", "saved": false}}
+{"time": 1793135227.7094886, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 1811, "completion_tokens": 273, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 6744}
+{"time": 1793135227.7097063, "event": "run_end", "stopped": "completed", "requests": 2, "tool_calls": 1}

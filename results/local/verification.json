@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-27T20:25:37.317101+00:00",
+  "checked_at": "2026-10-27T21:11:20.477374+00:00",
   "mode": "local_contracts_no_llm",
   "passed": true,
   "checks": [
@@ -44,7 +44,7 @@
     "evals/security.py": "8e9cd7079e289778418636fb5adf14408f7abbaac99b42f2d2f0193c5b8e76a2",
     "scripts/generate_data.py": "3362aa6183099585bac69c162b5f270b9e14fec85f2e13a0b4d03411d32d0c3a",
     "scripts/generate_tasks.py": "d75fb6915ca5a8e696df6d17f311d8b9aad5a5b42c68a9b0a414d685bba51b49",
-    "scripts/readiness.py": "c0fae2faa15e3539bad1120b975473fcce0a023ecd93d4f4cedc8571f51b2bab",
+    "scripts/readiness.py": "13ddd13554e5091b2e604b39ef4537b180b88cfa99272333a81055f996c2b97c",
     "scripts/verify_local.py": "3820afc8a8cc4a1537509d3afbd7232fbc92a76e8a0b8a0143935c2b785b8806",
     "tests/test_approvals.py": "44bcef006585b837d70586cb47ee7151ca2cefc2cd91df42357b73c458e71a62",
     "tests/test_cli.py": "9453e00d25b5aa85078b6ff96c1ada16b764343514445ecf430e96f6c5d7c8dc",
@@ -52,6 +52,7 @@
     "tests/test_eval_resume.py": "4a31aafe47de432146eca526cf3d16e6e8dfe65f0a0ac61ca1f7cbdbbb07f0b2",
     "tests/test_graders.py": "e42deb6ef219c3505cd09f2e61ed559b8d222b8cac752e80e8e51cae3e71ef88",
     "tests/test_provider.py": "3f33857e937bade85372b01431db0f228537acfbf795252a071c37cf171ebcd3",
+    "tests/test_readiness.py": "35b43b28c8300a8ec79221c1d1201bb4745c9c9b0e55b4ffce262f48a01aa6de",
     "tests/test_runtime.py": "0056d0b4ae43456ba400af949ce2ec75addc1a4f3ce39ec0b3079c5f739e94c1",
     "tests/test_security_evidence.py": "e10c8fb1ba7faa965632b521eaeee14b705a09c3a54760852a82848c7ae86dfb"
   }

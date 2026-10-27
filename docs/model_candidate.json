@@ -29,5 +29,5 @@
   },
   "checked_at": "2026-10-27T20:26:14.719937+00:00",
   "source": "https://openrouter.ai/api/v1/models",
-  "quality_evaluation": "Pilot succeeded; see actual live evaluation evidence for measured suite results."
+  "quality_evaluation": "Complete 20-task A/B: A 16/20, B 20/20 automatic passes; one trial. Manual prose/language defects documented in docs/error_analysis.md."
 }

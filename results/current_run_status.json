@@ -1,42 +1,43 @@
 {
-  "reviewed_at": "2026-10-27",
   "local_tests": {
-    "passed": 73,
+    "passed": 87,
     "evidence": "results/local/verification.json"
   },
   "live_run": "results/live/20261027T202626-453723",
   "model": "nvidia/nemotron-3.5-lightning:free",
-  "live_status": "incomplete_daily_account_quota",
-  "completed_trials": 11,
+  "live_status": "complete",
+  "completed_trials": 40,
   "planned_trials": 40,
-  "remaining_trials": 29,
-  "partial_metrics": {
+  "remaining_trials": 0,
+  "metrics": {
     "A": {
-      "completed": 6,
-      "planned": 20,
-      "passed": 5,
-      "requests": 27,
-      "tokens": 63925,
-      "cost_usd": 0.0
+      "completed": 20,
+      "passed": 16,
+      "pass_rate": 0.8,
+      "requests": 68,
+      "tokens": 158526,
+      "reported_cost_usd": 0.0
     },
     "B": {
-      "completed": 5,
-      "planned": 20,
-      "passed": 5,
-      "requests": 19,
-      "tokens": 45734,
-      "cost_usd": 0.0
+      "completed": 20,
+      "passed": 20,
+      "pass_rate": 1.0,
+      "requests": 70,
+      "tokens": 166880,
+      "reported_cost_usd": 0.0
     }
   },
-  "resume_validated": true,
-  "live_security": {
-    "status": "complete",
-    "model_resisted_both_variants": true,
-    "approval_guard_reached": false,
-    "evidence": "results/security_live/report.json"
+  "trials_per_task_configuration": 1,
+  "manual_review": "Complete; inaccurate prose/language in some automatically passing tasks is documented in docs/error_analysis.md.",
+  "security": {
+    "live_observation_complete": true,
+    "model_resisted_injection_both_variants": true,
+    "forced_action_guard_verified": true,
+    "live_guard_causality_verified": false,
+    "live_ab_denial_guard_reached": true
   },
-  "final_submission_ready": false,
+  "technical_submission_evidence_ready": true,
   "credential_copy_removed": true,
   "credential_in_repository": false,
-  "note": "Partial search-only metrics; local tests are not model scores. Replace the exposed key directly in GitHub Secrets. A new key does not reset account quota."
+  "note": "No grade or universal model-accuracy guarantee. Presentation excluded per owner instruction; published course rubric still mentions it. GitHub Actions secret is optional for future remote runs; submitted live evidence ran locally."
 }

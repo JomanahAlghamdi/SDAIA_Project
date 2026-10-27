@@ -5,7 +5,7 @@ An Arabic/English agent that helps university students find suitable synthetic c
 **Track:** 2 — Your harness  
 **Project owner:** Jomanah Alghamdi  
 **Data:** 30 synthetic opportunities, 6 synthetic student profiles; no real vacancies or employers.  
-**Status (2026-10-27):** 73 local tests pass. Real model tool use and a live injection experiment have run. **A/B evaluation is incomplete: 11/40 task/configuration trials finished before the account's daily quota returned HTTP 429. The 29 remaining trials and final analysis are pending; this is not yet a verified final capstone submission.** The completed live injection experiment resisted the attack in both variants; it did not reach the approval guard.
+**Status:** Technical submission evidence is complete: **87 local tests pass; all 20 tasks ran on A and B (40 trials). A passed 16/20 (80%); B passed 20/20 (100%) on the automatic graders.** Manual transcript review found wording/language defects that these graders miss; see the error analysis. The live injection was resisted in both variants. A separate forced-action experiment proves the approval guard, and live A/B approval-denial tests also reached that guard. This is a measured course prototype, not a promise of perfect answers or academic acceptance.
 
 Start in Arabic: [START_HERE_AR.md](START_HERE_AR.md). Exact requirement evidence: [docs/requirements.md](docs/requirements.md).
 
@@ -34,7 +34,7 @@ uv run pytest -q
 uv run python app.py demo --interactive
 ```
 
-For one repeatable local evidence run (tests + MCP + security replay + syntax checks), use `uv run python scripts/verify_local.py`. It records source hashes so readiness cannot reuse stale local evidence after code changes.
+For one repeatable local evidence run (tests + MCP + security replay + syntax checks), use `uv run python scripts/verify_local.py`. It records full source hashes so readiness cannot reuse stale local test evidence after code changes.
 
 The demo uses **scripted tool calls**, a real MCP subprocess, real eligibility rules and a disposable SQLite database. It does not understand arbitrary language or measure model quality. Omitting `--interactive` denies the requested write.
 
@@ -116,20 +116,20 @@ Actual provider usage is logged separately. Preflight token checks are deliberat
 
 Every task includes the course-standard `id`, `category`, `lang`, `prompt` and `graders` fields. The runner executes deterministic course `db` and `tool_called` graders, plus the stricter domain assertions in `expect`. It also supports `contains_any`, `not_contains` and `tool_not_called`. Database graders use read-only SQLite authorization. `turns` extends the format for follow-up tests; `prompt` is always the first turn. Use this repository's runner to preserve the synthetic profile, approval simulation and multi-turn state.
 
-**Partial live evidence only:** [run manifest](results/live/20261027T202626-453723/manifest.json), [A CSV](results/live/20261027T202626-453723/eval_A.csv), [B CSV](results/live/20261027T202626-453723/eval_B.csv), [partial summary](results/live/20261027T202626-453723/partial_summary.md).
+**Complete live evidence:** [run manifest](results/live/20261027T202626-453723/manifest.json), [A CSV](results/live/20261027T202626-453723/eval_A.csv), [B CSV](results/live/20261027T202626-453723/eval_B.csv), [summary](results/live/20261027T202626-453723/summary.md).
 
-| Config | Finished / planned | Passed among finished | Avg requests | Avg tokens |
-|---|---:|---:|---:|---:|
-| A | 6 / 20 | 5 / 6 (83.3%) | 4.50 | 10,654.2 |
-| B | 5 / 20 | 5 / 5 (100%) | 3.80 | 9,146.8 |
+| Config | Finished / planned | Pass rate | pass^k (k=1) | Avg requests | Avg tokens |
+|---|---:|---:|---:|---:|---:|
+| A | 20 / 20 | 16/20 (80%) | 80% | 3.40 | 7,926.3 |
+| B | 20 / 20 | 20/20 (100%) | 100% | 3.50 | 8,344.0 |
 
-These are unequal, search-only subsets, **not full-suite scores**. Among the five paired tasks, A passed 4/5 and B 5/5. One Arabic task flipped from failure to pass; one observed trial cannot establish that B caused an improvement. Full-suite pass^k is not reported. The interrupted B city-change trial is retained in the manifest and trace, outside the completed-row denominator. All observed completed rows reported USD 0 cost.
+Four A-fail/B-pass flips and no reverse flip were observed. With one trial per task/configuration, this is not a statistical or causal improvement claim. The account quota interrupted B's city-change task; after quota was raised, the unfinished trials resumed with identical experiment source, prompts, tasks and model. The interrupted attempt remains in the manifest and trace, outside the completed-trial denominator. All 40 completed rows reported USD 0 cost. The original 11-row partial summary is retained as historical evidence only.
 
 Local unit/integration results in `results/local/` are **not** model evaluation scores. Running the suite produces real CSVs, a version/hash manifest and per-task transcripts under `results/live/<run>/`; `summary.md` is produced only on completion. `pass^k` is the fraction of tasks that passed **every observed trial**; k=1 does not establish repeated reliability. Provider caching/temperature can still affect independence; no statistical significance claim is made.
 
 ### Error analysis
 
-The observed A Arabic failure returned prose instead of the required final JSON after correct search and eligibility calls. The conservative token-budget preflight then stopped the formatting repair. B returned valid JSON for that task, but its Arabic prose mixed English and used unclear GPA wording. See [docs/error_analysis.md](docs/error_analysis.md) for transcript-grounded analysis, the separate daily-quota interruption and the limitations of automatic grading. The remaining task categories have not yet been evaluated in this run.
+One A failure returned prose instead of final JSON and exhausted the conservative repair budget. Three A failures put an opportunity ID in the recommendation field while also requesting missing profile information. B passed these checks, but manual review still found misleading approval/submission wording and two Arabic tasks answered in English. These are real limitations outside the current automatic assertions, not grounds for claiming perfect B behavior. [Full root-cause analysis](docs/error_analysis.md) separates the four graded failures, ungraded prose defects and provider interruption.
 
 ## Security note
 
@@ -145,7 +145,9 @@ See [SECURITY.md](SECURITY.md) for the trifecta, injected fixture, code defence,
 6. Run `uv run python scripts/readiness.py --require-live`; review the requirement matrix.
 7. Submit a shared/public repository or ZIP; never include `.env`, keys, `.venv` or private data.
 
-Automatic GitHub CI runs local contracts only. The separate live workflow requires an `OPENROUTER_API_KEY` repository secret. It can be manually dispatched with the model ID and `resume` set to `results/live/20261027T202626-453723`, or triggered by committing that resume path to `.github/live-eval-request.json` after configuring the secret and restoring quota. The push trigger uses the concrete model ID specified in the workflow. Both paths revalidate zero pricing and tool support. Each live run uploads evidence as a GitHub Actions artifact; inspect and commit it before submission. The current real-model evidence was executed locally. An earlier GitHub attempt stopped before model calls because its repository secret was missing.
+Automatic GitHub CI runs local contracts only. The separate live workflow requires an `OPENROUTER_API_KEY` repository secret for future runs. Manually dispatch it with the default model and an empty `resume` field for a new evaluation. The completed run cannot be resumed. The push-trigger request file is historical; update it only for an intentional new run, with a valid incomplete run path or no resume field. Both paths revalidate zero pricing and tool support. Each run uploads an evidence artifact; inspect and commit new results before changing the published scores. The submitted real-model evidence was executed locally; earlier GitHub attempts stopped before model calls because the repository secret was missing.
+
+The readiness checker now reports three separate facts: live attack observation, forced-action guard enforcement, and live guard causality. The last remains false when the model resists before reaching the guard. Course evidence is checked using the completed live observation plus the independently verified guard experiment, not a requirement to make the model vulnerable. Original experiment manifests retain all hashes. Only the read-only readiness checker and its own tests are excluded when comparing experiment source; every runtime, prompt, data, dependency, grader and evaluation-runner hash must still match. The checker change did not alter agent behavior or A/B grading. Local verification always requires exact current full hashes.
 
 The course's published submission also includes slides/a live presentation. The project owner stated that their cohort does not require a presentation, so no slides are included. No change to the published grading weights is assumed.
 
@@ -157,7 +159,7 @@ The course's published submission also includes slides/a live presentation. The 
 - Session memory is in-process and resets on restart; drafts persist in local SQLite for live chat.
 - Matching enforces only modeled, published requirements. Unknown GPA/date/major fields remain unknown.
 - Exact domain labels/filters, a small catalog, limited attack coverage and simple automatic graders.
-- Incomplete live evaluation, one observed trial and search-only coverage so far; Arabic prose quality is not exhaustively graded. Larger data, robust authentication, retention policies and expanded evaluation are future work.
+- One observed trial on a small synthetic suite; automatic graders do not exhaustively verify language or claims. Some passing transcripts inaccurately describe future employer submission or pending approval; the host always states that drafts stay local, and no external submission tool exists. Larger data, stronger answer validation, authentication and repeated evaluation are future work.
 
 ## Sources
 

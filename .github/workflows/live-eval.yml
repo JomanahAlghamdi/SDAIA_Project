@@ -11,9 +11,9 @@ on:
         default: "nvidia/nemotron-3.5-lightning:free"
         type: string
       resume:
-        description: "Optional existing results/live run directory to resume"
+        description: "Leave empty for a new run; only resume an incomplete run with matching source"
         required: false
-        default: "results/live/20261027T202626-453723"
+        default: ""
         type: string
 permissions:
   contents: read

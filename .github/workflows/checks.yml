@@ -17,3 +17,5 @@ jobs:
       - run: uv run pytest -q
       - run: uv run python app.py doctor
       - run: uv run python -m evals.security --mode replay
+      - name: Verify submitted evaluation evidence
+        run: uv run python scripts/readiness.py --require-live
