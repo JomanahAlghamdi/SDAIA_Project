@@ -1,0 +1,10 @@
+{"time": 1793142786.7325425, "event": "run_start", "config": "B", "profile_id": "S001", "history_kept": 0, "history_removed": 0}
+{"time": 1793142786.7327144, "event": "request_budget", "spent_tokens": 0, "prompt_reservation": 9196, "reservation_basis": "full_utf8_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142789.717965, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2297, "completion_tokens": 282, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 9196}
+{"time": 1793142789.718122, "event": "tool_call", "tool": "save_application_draft", "arguments": {"opportunity_id": "OP001"}, "transport": "local"}
+{"time": 1793142789.7182713, "event": "approval_requested", "preview": {"student_id": "S001", "opportunity_id": "OP001", "company": "Synthetic Company 01", "title": "Data Co-op 01", "training_kind": "coop", "duration_months": 6, "start_date": "2027-01-15", "status": "Draft", "synthetic": true, "sent_to_employer": false, "profile_fingerprint": "d2262c39319c8523bc64db5677a91e4dfb2c28fc386078495236d87a31520478"}}
+{"time": 1793142789.7183204, "event": "guard_block", "reason": "human_denied", "opportunity_id": "OP001"}
+{"time": 1793142789.718352, "event": "tool_result", "tool": "save_application_draft", "result": {"status": "denied", "saved": false}}
+{"time": 1793142789.7185206, "event": "request_budget", "spent_tokens": 2579, "prompt_reservation": 3178, "reservation_basis": "measured_prefix_plus_new_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142795.0712686, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2356, "completion_tokens": 510, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 9565}
+{"time": 1793142795.0714297, "event": "run_end", "stopped": "completed", "requests": 2, "tool_calls": 1, "prompt_tokens": 4653, "completion_tokens": 792, "cost_usd": 0.0}

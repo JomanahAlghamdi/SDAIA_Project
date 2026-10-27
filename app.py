@@ -52,6 +52,7 @@ def show_run(run, verbose=False):
             "tool_budget": "I reached the tool limit before finishing. Try a narrower request.",
             "input_limit": "Please enter a message of 1 to 4,000 characters.",
             "provider_error": run.error or "The model provider could not complete this request.",
+            "invalid_final_response": "The model could not produce a valid answer after one repair. Please try a shorter request; no successful answer was produced.",
         }
         print("\nAssistant:", explanations.get(run.stopped, "The request stopped before a complete answer was produced."))
     # Report actual write outcomes even when the final model response fails.

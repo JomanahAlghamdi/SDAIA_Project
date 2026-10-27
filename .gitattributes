@@ -1,0 +1,2 @@
+# Keep source/evidence fingerprints reproducible on Windows and Linux checkouts.
+* text=auto eol=lf

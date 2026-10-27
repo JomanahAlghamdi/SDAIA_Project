@@ -25,6 +25,8 @@ class Completion:
     cost_usd: float
     model: str
     cost_source: str = "provider"
+    finish_reason: str = ""
+    reasoning_tokens: int = 0
 
 
 async def free_tool_models() -> list[dict]:
@@ -70,6 +72,10 @@ class OpenRouter:
         if self.model not in available:
             raise ProviderError("Configured model is not currently listed as a concrete free tool-calling model. Re-select explicitly; no paid fallback.")
         self.metadata = available[self.model]
+        # Preserve the short visible-output budget for narrow tool tasks.
+        reasoning = self.metadata.get("reasoning", {}) or {}
+        self.reasoning_options = ({"enabled": False} if "reasoning" in self.metadata.get("supported_parameters", [])
+                                  and not reasoning.get("mandatory", False) else None)
         self.client = httpx.AsyncClient(timeout=httpx.Timeout(60, connect=15), follow_redirects=False)
         return self
 
@@ -85,6 +91,7 @@ class OpenRouter:
                 headers={"Authorization": "Bearer " + self.key, "X-Title": "Internship Finder synthetic capstone"},
                 json={"model": self.model, "messages": messages, "tools": tools, "tool_choice": "auto",
                       "temperature": 0, "max_tokens": max_tokens, "stream": False,
+                      **({"reasoning": self.reasoning_options} if getattr(self, "reasoning_options", None) is not None else {}),
                       "provider": {"require_parameters": True, "max_price": {"prompt": 0, "completion": 0}}})
         except httpx.HTTPError:
             raise ProviderError("Provider connection/timeout error. Request stopped; no retry or fallback.") from None
@@ -112,6 +119,9 @@ class OpenRouter:
             prompt_tokens, completion_tokens = int(usage["prompt_tokens"]), int(usage["completion_tokens"])
             if min(prompt_tokens, completion_tokens) < 0:
                 raise ValueError("negative usage")
+            reasoning_tokens = int((usage.get("completion_tokens_details") or {}).get("reasoning_tokens", 0) or 0)
+            if not 0 <= reasoning_tokens <= completion_tokens:
+                raise ValueError("invalid reasoning usage")
             cost = float(usage["cost"]) if usage.get("cost") is not None else 0.0
             if cost < 0 or not math.isfinite(cost):
                 raise ValueError("negative cost")
@@ -119,7 +129,9 @@ class OpenRouter:
                 raise ValueError("invalid message")
             return Completion(message=message, prompt_tokens=prompt_tokens, completion_tokens=completion_tokens,
                               cost_usd=cost, model=body.get("model", self.model),
-                              cost_source="provider" if usage.get("cost") is not None else "verified_zero_price_estimate")
+                              cost_source="provider" if usage.get("cost") is not None else "verified_zero_price_estimate",
+                              finish_reason=str(body["choices"][0].get("finish_reason") or ""),
+                              reasoning_tokens=reasoning_tokens)
         except (KeyError, IndexError, ValueError, TypeError):
             raise ProviderError("Provider returned missing/malformed message or usage. Stopping; no invented metrics.") from None
 

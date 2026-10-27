@@ -1,0 +1,10 @@
+{"time": 1793142513.6354318, "event": "run_start", "config": "A", "profile_id": "S001", "history_kept": 0, "history_removed": 0}
+{"time": 1793142513.6356058, "event": "request_budget", "spent_tokens": 0, "prompt_reservation": 8948, "reservation_basis": "full_utf8_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142515.3051047, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2244, "completion_tokens": 132, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 8948}
+{"time": 1793142515.3052657, "event": "tool_call", "tool": "check_eligibility", "arguments": {"opportunity_id": "OP001"}, "transport": "local"}
+{"time": 1793142515.3053203, "event": "tool_result", "tool": "check_eligibility", "result": {"opportunity_id": "OP001", "status": "needs_info", "passed": ["major", "year", "training_kind", "required_months", "gpa"], "failures": [], "missing": ["available_from"], "notice": "Preliminary match to synthetic published requirements; not employer acceptance."}}
+{"time": 1793142515.3054988, "event": "request_budget", "spent_tokens": 2376, "prompt_reservation": 3359, "reservation_basis": "measured_prefix_plus_new_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142519.4797487, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2358, "completion_tokens": 273, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 9551}
+{"time": 1793142519.4800987, "event": "request_budget", "spent_tokens": 5007, "prompt_reservation": 3614, "reservation_basis": "measured_prefix_plus_new_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142522.960141, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2517, "completion_tokens": 267, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 10295}
+{"time": 1793142522.960308, "event": "run_end", "stopped": "completed", "requests": 3, "tool_calls": 1, "prompt_tokens": 7119, "completion_tokens": 672, "cost_usd": 0.0}

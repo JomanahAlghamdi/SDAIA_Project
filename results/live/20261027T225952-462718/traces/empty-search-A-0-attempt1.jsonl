@@ -1,0 +1,8 @@
+{"time": 1793142672.69592, "event": "run_start", "config": "A", "profile_id": "S001", "history_kept": 0, "history_removed": 0}
+{"time": 1793142672.6960995, "event": "request_budget", "spent_tokens": 0, "prompt_reservation": 8971, "reservation_basis": "full_utf8_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142675.8837602, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2257, "completion_tokens": 271, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 8971}
+{"time": 1793142675.8839586, "event": "tool_call", "tool": "search_opportunities", "arguments": {"field": "Data", "cities": ["Makkah"], "kind": "coop", "limit": 5, "offset": 0}, "transport": "mcp_stdio"}
+{"time": 1793142675.885574, "event": "tool_result", "tool": "search_opportunities", "result": {"synthetic": true, "as_of": "2026-10-27", "total": 0, "offset": 0, "next_offset": null, "opportunities": []}}
+{"time": 1793142675.885788, "event": "request_budget", "spent_tokens": 2528, "prompt_reservation": 3266, "reservation_basis": "measured_prefix_plus_new_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142684.403169, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2383, "completion_tokens": 819, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 9468}
+{"time": 1793142684.403333, "event": "run_end", "stopped": "completed", "requests": 2, "tool_calls": 1, "prompt_tokens": 4640, "completion_tokens": 1090, "cost_usd": 0.0}

@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 
 from pydantic import ValidationError
 
-from .catalog import ROOT
+from .catalog import ROOT, check_eligibility
 from .harness import Harness
 from .models import FinalAnswer, tool_schemas
 from .provider import ProviderError
@@ -133,6 +133,7 @@ class Agent:
         self.harness.trace.add("run_start", config=self.config, profile_id=self.harness.student.id,
                                history_kept=len(history), history_removed=len(self.history) - len(history))
         meter = PromptBudget()
+        repairs = 0
         for _ in range(self.limits.max_steps):
             bound = token_upper_bound([messages, tools])
             estimate, basis = meter.estimate(messages, tools)
@@ -175,7 +176,8 @@ class Agent:
             run.models.append(completion.model)
             self.harness.trace.add("model_usage", model=completion.model, prompt_tokens=completion.prompt_tokens,
                                    completion_tokens=completion.completion_tokens, cost_usd=completion.cost_usd,
-                                   cost_source=completion.cost_source, input_token_upper_bound=bound)
+                                   cost_source=completion.cost_source, input_token_upper_bound=bound,
+                                   finish_reason=completion.finish_reason, reasoning_tokens=completion.reasoning_tokens)
             # Stop BEFORE any side effect if the provider has already exceeded a meter.
             if run.cost_usd > self.limits.max_cost_usd:
                 run.stopped = "cost_budget"
@@ -219,14 +221,31 @@ class Agent:
                 run.final = FinalAnswer.model_validate_json(content)
                 if any(oid not in self.harness.catalog.items for oid in run.final.opportunity_ids):
                     raise ValueError("Unknown opportunity IDs in final answer")
+                invalid = [oid for oid in run.final.opportunity_ids if check_eligibility(
+                    self.harness.student, self.harness.catalog.get(oid), self.harness.today())["status"] != "eligible"]
+                if invalid:
+                    raise ValueError("opportunity_ids contains unverified/ineligible IDs: " + ", ".join(invalid)
+                                     + ". Mention candidates in answer, but remove them from opportunity_ids."
+                                     + " Browsing needs no personal eligibility check and needs_info must be [].")
                 messages.append({"role": "assistant", "content": content})
                 run.stopped = "completed"
                 break
-            except (ValidationError, ValueError):
+            except (ValidationError, ValueError) as exc:
                 run.final = None
+                repairs += 1
+                self.harness.trace.add("final_repair", attempt=repairs, empty=not bool(msg.get("content")),
+                                       finish_reason=completion.finish_reason, reason=str(exc)[:300])
+                if repairs > 1:
+                    run.stopped = "invalid_final_response"
+                    break
                 # Repair within the SAME request/step/token budgets.
+                correction = ("Return only the specified JSON schema, using known catalog IDs. "
+                              "Use empty opportunity_ids for browsing or unverified eligibility. "
+                              "This is a response repair, not new approval. ")
+                if not isinstance(exc, ValidationError):
+                    correction += str(exc)
                 messages.extend([{"role": "assistant", "content": (msg.get("content") or "")[:5000]},
-                                 {"role": "user", "content": "Return only the specified JSON schema, using known catalog IDs. This is a formatting repair, not new approval."}])
+                                 {"role": "user", "content": correction}])
         else:
             run.stopped = "step_budget"
         if run.final:

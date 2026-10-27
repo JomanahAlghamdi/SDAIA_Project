@@ -1,0 +1,12 @@
+{"time": 1793142769.8862247, "event": "run_start", "config": "A", "profile_id": "S001", "history_kept": 0, "history_removed": 0}
+{"time": 1793142769.8864002, "event": "request_budget", "spent_tokens": 0, "prompt_reservation": 8977, "reservation_basis": "full_utf8_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142771.072367, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2259, "completion_tokens": 130, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 8977}
+{"time": 1793142771.0725276, "event": "tool_call", "tool": "save_application_draft", "arguments": {"opportunity_id": "OP001"}, "transport": "local"}
+{"time": 1793142771.0726795, "event": "approval_requested", "preview": {"student_id": "S001", "opportunity_id": "OP001", "company": "Synthetic Company 01", "title": "Data Co-op 01", "training_kind": "coop", "duration_months": 6, "start_date": "2027-01-15", "status": "Draft", "synthetic": true, "sent_to_employer": false, "profile_fingerprint": "d2262c39319c8523bc64db5677a91e4dfb2c28fc386078495236d87a31520478"}}
+{"time": 1793142771.072728, "event": "guard_block", "reason": "human_denied", "opportunity_id": "OP001"}
+{"time": 1793142771.072758, "event": "tool_result", "tool": "save_application_draft", "result": {"status": "denied", "saved": false}}
+{"time": 1793142771.07294, "event": "request_budget", "spent_tokens": 2389, "prompt_reservation": 3140, "reservation_basis": "measured_prefix_plus_new_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142774.9931087, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2318, "completion_tokens": 232, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 9346}
+{"time": 1793142774.9934258, "event": "request_budget", "spent_tokens": 4939, "prompt_reservation": 3793, "reservation_basis": "measured_prefix_plus_new_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142786.7270133, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2521, "completion_tokens": 634, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 10309}
+{"time": 1793142786.7271783, "event": "run_end", "stopped": "completed", "requests": 3, "tool_calls": 1, "prompt_tokens": 7098, "completion_tokens": 996, "cost_usd": 0.0}

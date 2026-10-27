@@ -1,0 +1,16 @@
+{"time": 1793142861.7394044, "event": "run_start", "config": "A", "profile_id": "S001", "history_kept": 0, "history_removed": 0}
+{"time": 1793142861.7395897, "event": "request_budget", "spent_tokens": 0, "prompt_reservation": 8973, "reservation_basis": "full_utf8_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142868.979017, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2259, "completion_tokens": 900, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 8973}
+{"time": 1793142868.9792728, "event": "request_budget", "spent_tokens": 3159, "prompt_reservation": 2952, "reservation_basis": "measured_prefix_plus_new_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142876.5541863, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2294, "completion_tokens": 900, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 9154}
+{"time": 1793142876.5544531, "event": "request_budget", "spent_tokens": 6353, "prompt_reservation": 2987, "reservation_basis": "measured_prefix_plus_new_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142884.139025, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2329, "completion_tokens": 900, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 9335}
+{"time": 1793142884.1393082, "event": "request_budget", "spent_tokens": 9582, "prompt_reservation": 3022, "reservation_basis": "measured_prefix_plus_new_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142891.0035145, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2364, "completion_tokens": 900, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 9516}
+{"time": 1793142891.003785, "event": "request_budget", "spent_tokens": 12846, "prompt_reservation": 3057, "reservation_basis": "measured_prefix_plus_new_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142899.9362361, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2399, "completion_tokens": 900, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 9697}
+{"time": 1793142899.9365177, "event": "request_budget", "spent_tokens": 16145, "prompt_reservation": 3092, "reservation_basis": "measured_prefix_plus_new_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142908.217522, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2434, "completion_tokens": 900, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 9878}
+{"time": 1793142908.2178037, "event": "request_budget", "spent_tokens": 19479, "prompt_reservation": 3127, "reservation_basis": "measured_prefix_plus_new_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793142915.5543606, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2469, "completion_tokens": 900, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 10059}
+{"time": 1793142915.554644, "event": "run_end", "stopped": "token_budget", "requests": 7, "tool_calls": 0, "prompt_tokens": 16548, "completion_tokens": 6300, "cost_usd": 0.0}

@@ -195,6 +195,36 @@ async def test_invalid_final_format_repair_and_memory(tmp_path):
 
 
 @pytest.mark.asyncio
+async def test_unverified_ids_are_repaired_without_rewriting_model_answer(tmp_path):
+    store = DraftStore(tmp_path / "db.sqlite")
+    try:
+        h = Harness(new_student(), Catalog(), None, store, today=date(2026, 10, 27))
+        agent = Agent(h, ReplayProvider([
+            scripted_final("OP012 is a synthetic search candidate.", ["OP012"]),
+            scripted_final("Synthetic candidate OP012; personal eligibility not checked.")]))
+        result = await agent.run("Browse AI opportunities")
+        assert result.stopped == "completed" and result.requests == 2
+        assert result.final.opportunity_ids == []
+        assert result.final.answer == "Synthetic candidate OP012; personal eligibility not checked."
+        assert any(e["event"] == "final_repair" for e in result.events)
+        assert store.count() == 0
+    finally:
+        store.close()
+
+
+@pytest.mark.asyncio
+async def test_repeated_empty_output_stops_after_one_repair(tmp_path):
+    store = DraftStore(tmp_path / "db.sqlite")
+    try:
+        h = Harness(new_student(), Catalog(), None, store)
+        result = await Agent(h, ReplayProvider([{"content": ""}] * 8)).run("Hello")
+        assert result.stopped == "invalid_final_response" and result.requests == 2
+        assert result.final is None and store.count() == 0
+    finally:
+        store.close()
+
+
+@pytest.mark.asyncio
 async def test_invalid_function_json_is_observation(tmp_path):
     store = DraftStore(tmp_path / "db.sqlite")
     try:

@@ -78,7 +78,8 @@ async def evaluate(args):
             manifest.update(status="running", requested_model=provider.model)
             metadata = getattr(provider, "metadata", {})
             manifest["model_metadata"] = {key: metadata[key] for key in
-                ("id", "context_length", "supported_parameters", "pricing") if key in metadata}
+                ("id", "context_length", "supported_parameters", "pricing", "reasoning") if key in metadata}
+            manifest["request_reasoning"] = getattr(provider, "reasoning_options", None)
             write_manifest()
             # Interleave A/B within each task/trial to reduce order/time confounds.
             async with CatalogBridge(date(2026, 10, 27)) as bridge:

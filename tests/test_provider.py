@@ -28,6 +28,35 @@ async def test_provider_payload_and_usage():
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("mandatory,expected", [(False, {"enabled": False}), (True, None)])
+async def test_optional_reasoning_control_preserves_mandatory_models(monkeypatch, mandatory, expected):
+    async def metadata():
+        return [{"id": "test/model:free", "supported_parameters": ["tools", "reasoning"],
+                 "reasoning": {"mandatory": mandatory}}]
+    monkeypatch.setattr("finder.provider.free_tool_models", metadata)
+    async with OpenRouter(key="synthetic-test-key", model="test/model:free") as provider:
+        assert provider.reasoning_options == expected
+
+
+@pytest.mark.asyncio
+async def test_provider_records_truncation_and_reasoning_usage():
+    def respond(request):
+        import json
+        assert json.loads(request.content)["reasoning"] == {"enabled": False}
+        return httpx.Response(200, json={"model": "test/model:free",
+            "choices": [{"message": {"content": ""}, "finish_reason": "length"}],
+            "usage": {"prompt_tokens": 2000, "completion_tokens": 900, "cost": 0,
+                      "completion_tokens_details": {"reasoning_tokens": 900}}})
+    provider = OpenRouter(key="synthetic-test-key", model="test/model:free")
+    provider.reasoning_options = {"enabled": False}
+    async with httpx.AsyncClient(transport=httpx.MockTransport(respond)) as client:
+        provider.client = client
+        result = await provider.complete([], [])
+        assert result.finish_reason == "length" and result.reasoning_tokens == 900
+        assert result.completion_tokens == 900
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("status,body", [(429, {"error": "secret must not be echoed"}),
                                         (200, {"choices": [{"message": {"content": "hello"}}]})])
 async def test_provider_errors_never_invent_usage_or_echo_body(status, body):

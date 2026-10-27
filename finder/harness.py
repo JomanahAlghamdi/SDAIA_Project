@@ -98,7 +98,7 @@ class Harness:
         if approved is not True:
             self.denied_this_turn.add(opportunity_id)
             self.trace.add("guard_block", reason="human_denied", opportunity_id=opportunity_id)
-            return {"status": "denied", "saved": False}
+            return {"status": "denied", "saved": False, "approval_requested": True, "reason": "human_declined"}
         # Human reviewed this exact object. Recheck owner/content/eligibility after the callback.
         if preview != self.preview(opportunity_id) or check_eligibility(self.student, self.catalog.get(opportunity_id), self.today())["status"] != "eligible":
             self.trace.add("guard_block", reason="stale_approval", opportunity_id=opportunity_id)
