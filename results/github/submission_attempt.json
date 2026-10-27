@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-27",
+  "source_commit": "c0540a6e7c0b2526ce6999a88d67f6b6a2e19e26",
+  "local_ci": {
+    "run_id": 40581023407,
+    "url": "https://github.com/JomanahAlghamdi/SDAIA_Project/actions/runs/40581023407",
+    "conclusion": "success",
+    "tests_passed": 73
+  },
+  "live_attempt": {
+    "run_id": 40581023532,
+    "url": "https://github.com/JomanahAlghamdi/SDAIA_Project/actions/runs/40581023532",
+    "conclusion": "failure",
+    "stopped_at": "Check repository secret",
+    "reason": "OPENROUTER_API_KEY is missing from repository Actions secrets",
+    "new_model_calls": 0,
+    "new_evaluation_rows": 0
+  },
+  "retained_live_run": "results/live/20261027T202626-453723",
+  "completed_trials": 11,
+  "remaining_trials": 29,
+  "guide": "SUBMISSION_AR.md",
+  "final_submission_ready": false
+}
