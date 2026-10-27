@@ -1,0 +1,31 @@
+{
+  "status": "blocked",
+  "mode": "live_openrouter",
+  "configurations": [
+    "A",
+    "B"
+  ],
+  "task_count": 20,
+  "trials": 1,
+  "python": "3.12.14",
+  "hashes": {
+    "tasks.jsonl": "bbbdf39a50221e29add3ea55c806d6ec52f308eb0ff371eda559f15bf37cba39",
+    "data/opportunities.json": "864973d76364fb978c983b0c03eda36cc1a84ff9e3b3a0c500fa19b0e7b74a4a",
+    "data/students.json": "fcc483e89d0689425c9e9dbb04db836e2c39ba6576e2c08093f386522afbffe4",
+    "prompts/system.md": "3af508fe57bbcb693b76cde8bed6d43295e65547150843503b0cbca580e9c638",
+    "prompts/config_b.txt": "192f5ff58e978bf35a08895eedfbb3c61f367accc9bc60a1e1c5441a7c5bd163",
+    "uv.lock": "6b8584493087e638328ff5649e4b662cd55e3eeaf0fc4cf28a9cd536c8aeac0d",
+    "finder/__init__.py": "b34fbc1b0d091860a43405b212fbf18fb80000b3abd188e5366aca7c8e7e58e8",
+    "finder/agent.py": "97ae7434704269884bc224bbf2e95f4d7b95948a2935d800fa8ba7d336af3d1f",
+    "finder/catalog.py": "c2c07853acd738bd30cea106d6da5c601f6d0aba43582f2a0bdfa2b0da7a8a0d",
+    "finder/harness.py": "f1a47e0b52aec147decb0cb3c113bdcf733a9ec9ac1195f23e718b5c845492ad",
+    "finder/mcp_client.py": "0d11c049099156d3d7f1a8b31e9efaae1989a794de110819ea9685bc5f8c972a",
+    "finder/models.py": "e2e706ea18714fde2278049ca811ab63c0e56e9c8e59da7c40371e871faded29",
+    "finder/provider.py": "75cb56e8b0037ca279f4fff5137a68f40775a218268061c5051160e9e312f30b",
+    "finder/storage.py": "3551dfcf2a306f11f503806bbe756a9be5f7e9f0668b2224f642b714bb7280e4"
+  },
+  "rows": 0,
+  "cache": "no application response cache",
+  "approval": "explicit per-task simulated human decisions; isolated synthetic DB",
+  "reason": "OPENROUTER_API_KEY is missing. Set it locally in .env; never commit or share it."
+}

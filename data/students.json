@@ -1,0 +1,62 @@
+[
+  {
+    "id": "S001",
+    "major": "Artificial Intelligence",
+    "year": 4,
+    "gpa": 3.6,
+    "training_kind": "coop",
+    "required_months": 6,
+    "available_from": "2027-01-01",
+    "synthetic": true
+  },
+  {
+    "id": "S002",
+    "major": "Business Administration",
+    "year": 4,
+    "gpa": 3.2,
+    "training_kind": "coop",
+    "required_months": 6,
+    "available_from": "2027-01-01",
+    "synthetic": true
+  },
+  {
+    "id": "S003",
+    "major": "Computer Science",
+    "year": 2,
+    "gpa": 3.4,
+    "training_kind": "summer",
+    "required_months": 2,
+    "available_from": "2027-06-01",
+    "synthetic": true
+  },
+  {
+    "id": "S004",
+    "major": "Information Systems",
+    "year": 4,
+    "gpa": 3.3,
+    "training_kind": "coop",
+    "required_months": 6,
+    "available_from": "2027-03-01",
+    "synthetic": true
+  },
+  {
+    "id": "S005",
+    "major": null,
+    "year": null,
+    "gpa": null,
+    "training_kind": null,
+    "required_months": null,
+    "available_from": null,
+    "synthetic": true
+  },
+  {
+    "id": "S006",
+    "major": "Artificial Intelligence",
+    "year": 1,
+    "gpa": 2.0,
+    "training_kind": "coop",
+    "required_months": 6,
+    "available_from": "2027-01-01",
+    "synthetic": true
+  }
+]

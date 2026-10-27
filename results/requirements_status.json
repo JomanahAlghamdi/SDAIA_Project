@@ -1,0 +1,26 @@
+{
+  "local_contracts": {
+    "passed": true,
+    "test_count": 57,
+    "evidence": "results/local/tests.xml"
+  },
+  "tools_and_mcp": "implemented; see real MCP integration tests and doctor output",
+  "context_and_limits": "implemented; see finder/agent.py and runtime tests",
+  "human_write_approval": "implemented; see approval tests and replay traces",
+  "eval_tasks": 20,
+  "live_ab": {
+    "complete_current_source_runs": [],
+    "verified": false
+  },
+  "live_attack_before_after": {
+    "verified": false,
+    "evidence": null
+  },
+  "root_cause_analysis": {
+    "pending_marker_removed": false,
+    "human_review_required": true
+  },
+  "presentation": "excluded by project owner's cohort instructions; still present in published rubric",
+  "final_submission_ready": false,
+  "note": "Readiness is an evidence checklist, not a guarantee of passing. Review model rationale, actual README scores, analysis and cohort submission rules manually."
+}

@@ -1,0 +1,21 @@
+[project]
+name = "internship-finder"
+version = "0.1.0"
+description = "Synthetic-data co-op and summer internship assistant — SDAIA capstone"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx[socks]>=0.28,<1",
+    "mcp>=1.20,<2",
+    "python-dotenv>=1,<2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8,<10",
+    "pytest-asyncio>=0.24,<2",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+asyncio_mode = "auto"
+testpaths = ["tests"]

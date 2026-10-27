@@ -1,0 +1,29 @@
+{
+  "clean_extraction": true,
+  "dependency_install": "uv sync --locked --offline from already-downloaded packages",
+  "checks": [
+    {
+      "command": "uv sync --locked --offline",
+      "exit_code": 0,
+      "passed": true
+    },
+    {
+      "command": "uv run python scripts/verify_local.py",
+      "exit_code": 0,
+      "passed": true
+    },
+    {
+      "command": "uv run python app.py demo --interactive",
+      "exit_code": 0,
+      "passed": true
+    },
+    {
+      "command": "uv run python app.py ask Hello",
+      "exit_code": 2,
+      "passed": true
+    }
+  ],
+  "secret_scan_findings": [],
+  "passed": true,
+  "live_llm_run": false
+}

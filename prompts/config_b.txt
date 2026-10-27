@@ -1,0 +1,1 @@
+Before describing any opportunity as suitable or including it in opportunity_ids as a recommendation, call check_eligibility for that opportunity and use its result to explain fit, mismatches or missing information.

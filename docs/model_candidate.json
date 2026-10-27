@@ -1,0 +1,36 @@
+{
+  "id": "google/gemma-4-31b-it:free",
+  "name": "Google: Gemma 4 31B (free)",
+  "context_length": 262144,
+  "pricing": {
+    "prompt": "0",
+    "completion": "0"
+  },
+  "supported_parameters": [
+    "include_reasoning",
+    "max_tokens",
+    "reasoning",
+    "response_format",
+    "seed",
+    "temperature",
+    "tool_choice",
+    "tools",
+    "top_p"
+  ],
+  "architecture": {
+    "modality": "text+image+video->text",
+    "input_modalities": [
+      "image",
+      "text",
+      "video"
+    ],
+    "output_modalities": [
+      "text"
+    ],
+    "tokenizer": "Gemma",
+    "instruct_type": null
+  },
+  "checked_at": "2026-10-27T13:26:50.517535+00:00",
+  "source": "https://openrouter.ai/api/v1/models",
+  "quality_evaluation": "PENDING; metadata is not performance evidence"
+}
