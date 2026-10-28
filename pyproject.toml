@@ -7,10 +7,13 @@ dependencies = [
     "httpx[socks]>=0.28,<1",
     "mcp>=1.20,<2",
     "python-dotenv>=1,<2",
+    "starlette>=1.10,<2",
+    "uvicorn>=0.54,<1",
 ]
 
 [dependency-groups]
 dev = [
+    "playwright>=1.58,<2",
     "pytest>=8,<10",
     "pytest-asyncio>=0.24,<2",
 ]

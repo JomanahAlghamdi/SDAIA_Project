@@ -23,7 +23,7 @@ concurrency:
 jobs:
   live:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
       OPENROUTER_MODEL: ${{ inputs.model || 'nvidia/nemotron-3.5-lightning:free' }}
@@ -45,6 +45,21 @@ jobs:
       - run: uv sync --locked
       - name: Verify current local contracts before calling a model
         run: uv run python scripts/verify_local.py
+      - name: Focused live pilot before the complete experiment
+        run: uv run python -m evals.run --config B --task chat-followup-city-no-profile approved-save missing-kind search-data-riyadh --out results/pilots --require-pass
+      - name: Install browser for the actual HTML demonstration
+        run: uv run playwright install --with-deps chromium
+      - name: Preserve previous browser evidence
+        run: |
+          uv run python - <<'PY'
+          import os, shutil
+          from pathlib import Path
+          source = Path('results/web_live')
+          if source.exists():
+              shutil.copytree(source, Path('results/web_attempts') / (os.environ['GITHUB_RUN_ID'] + '-' + os.environ['GITHUB_RUN_ATTEMPT']), dirs_exist_ok=True)
+          PY
+      - name: Live browser conversation and real approval buttons
+        run: uv run python scripts/web_smoke.py
       - name: Resume or start actual A/B evaluation
         run: |
           uv run python - <<'PY'

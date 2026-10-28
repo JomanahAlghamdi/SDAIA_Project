@@ -1,5 +1,5 @@
 {
-  "request": "chat-behavior-review-2026-10-28",
-  "purpose": "Re-evaluate all 25 unchanged tasks on A/B after reviewing the 17/25 and 19/25 failed baseline. Verify no-profile browsing, bounded response repair and optional-reasoning control. Preserve every earlier outcome.",
+  "request": "html-interface-review-2026-10-28",
+  "purpose": "Test the English HTML chat, browser approval and session isolation. Restore bounded reasoning after the preserved reasoning-off regression. Require a focused pilot before browser and all 25 unchanged A/B tasks. Remove the evaluation key only after final verification.",
   "synthetic_data_only": true
 }

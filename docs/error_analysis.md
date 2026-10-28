@@ -40,3 +40,13 @@ Run `20261027T225952-462718` evaluated commit `c1ef6099d17637f3ed6ee10f9ed1136e6
 The instructions now distinguish browsing, personal assessment and local drafts, using empty shortlist/missing-info arrays for browsing and mandatory details retrieval. The same 24,000-token total and 900-token output limits remain. A fresh complete run is required because runtime and prompts changed.
 
 Reference: [OpenRouter reasoning/output budget documentation](https://openrouter.ai/docs/guides/best-practices/reasoning-tokens).
+
+## Reasoning-off regression retained (2026-10-28)
+
+Run `20261027T232735-021898` completed all 50 trials on source `2ca070856b15b6a0e47961a13c5127d72baf242e`. A passed **18/25 (72%)** and B **17/25 (68%)**. Basic no-profile browsing and requirements passed, but both configurations answered city follow-ups without a fresh search and failed the approved/denied/duplicate-save workflows. A also failed missing-kind and the incomplete-details save case; B missed personal recommendations in Data/Riyadh and remote searches. These results are not submission-ready and are preserved without retries or regrading.
+
+Disabling reasoning reduced token use but regressed structured tool execution. NVIDIA documents this risk for Lightning with reasoning off. The next revision restores reasoning with an explicit requested 1,024-token reasoning budget, allows 3,072 generated tokens for reasoning plus visible JSON, and sets the per-turn total ceiling to 32,000. Actual provider usage remains enforced before actions. The original conservative-prefix fix remains. Instructions explicitly require a new search on a changed city and clarify that the supplied tools can prepare a preview without asking for permission to read. No grader expectations have been relaxed. A four-task live pilot must pass before the complete experiment runs.
+
+The new HTML interface uses the SAME Agent, MCP client, eligibility checker and approval boundary. Browser tests must demonstrate real conversation, optional academic entry, denial, approval and duplicate prevention before readiness can pass. Web source files are now included in evidence fingerprints.
+
+Reference: [NVIDIA's reasoning-off tool-calling limitation](https://github.com/NVIDIA-AI-Blueprints/nemotron-voice-agent/blob/main/docs/how-to/configure-llm.md).

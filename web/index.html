@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Internship Finder · Your next step</title>
+  <link rel="stylesheet" href="/assets/style.css"><script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="Internship Finder home"><span class="brand-icon">↗</span><span>Internship<br><strong>Finder</strong></span></a>
+    <button class="new-chat" id="newChat"><span>＋</span> New conversation</button>
+    <div class="sidebar-note"><span class="eyebrow">A LITTLE DIRECTION</span><h2>Find your<br>next step.</h2><p>Explore opportunities, understand the requirements, and see what fits.</p></div>
+    <div class="demo-note"><span class="status-dot"></span><div><strong>A learning project</strong><p>All opportunities are synthetic. No applications are sent to employers.</p></div></div>
+    <p class="sidebar-footer">SDAIA · Agentic AI capstone</p>
+  </aside>
+  <main>
+    <header><div><span class="header-label">YOUR INTERNSHIP ASSISTANT</span><p id="connection">Connecting…</p></div><button id="detailsButton" class="secondary">Academic details <span>↗</span></button></header>
+    <div id="error" role="alert" hidden></div>
+    <section class="conversation" id="conversation" aria-label="Conversation">
+      <div class="welcome" id="welcome">
+        <span class="welcome-icon" aria-hidden="true">✳</span><span class="eyebrow">LET’S FIND A GOOD START</span>
+        <h1>Where do you<br>want to grow?</h1><p>Tell me the field and city you have in mind.<br>No profile needed to explore.</p>
+        <div class="suggestions">
+          <button data-prompt="I need an internship opportunity for AI in Riyadh"><span>01</span><strong>AI in Riyadh</strong><small>Explore available opportunities ↗</small></button>
+          <button data-prompt="Find a summer Software internship in Riyadh"><span>02</span><strong>A summer in software</strong><small>Find a summer placement ↗</small></button>
+          <button data-prompt="Find remote Data co-op opportunities"><span>03</span><strong>Work from anywhere</strong><small>Browse remote Data co-ops ↗</small></button>
+        </div>
+      </div>
+      <div id="messages" aria-live="polite"></div>
+      <div id="busy" class="busy" role="status" hidden><span class="spinner"></span><span id="busyText">Looking through opportunities…</span></div>
+      <section id="approval" class="approval" aria-label="Local draft approval" hidden>
+        <span class="eyebrow">YOUR DECISION</span><h2>Review this local draft</h2><p>Approve only if these details are correct. Nothing will be sent to an employer.</p><dl id="preview"></dl>
+        <div class="approval-actions"><button class="secondary" id="decline">Decline</button><button class="primary" id="approve">Approve & save locally</button></div>
+      </section>
+    </section>
+    <div class="composer-wrap"><form id="chatForm"><label for="message" class="sr-only">Your message</label><textarea id="message" rows="1" maxlength="4000" placeholder="Ask about an internship…" required></textarea><button id="send" class="send" aria-label="Send message" type="submit">↑</button></form><p class="composer-note">English conversation · Synthetic opportunities <span id="catalogDate"></span></p></div>
+  </main>
+  <dialog id="detailsDialog"><form id="detailsForm"><div class="dialog-heading"><div><span class="eyebrow">OPTIONAL</span><h2>Academic details</h2></div><button id="closeDetails" type="button" class="icon-button" aria-label="Close academic details">×</button></div><p class="dialog-note">Only needed for a personal eligibility check or a local draft. Use fictional values for this demo. Leave unknown fields blank.</p><div class="fields">
+    <label>Major<select name="major"><option value="">Unknown</option><option>Artificial Intelligence</option><option>Computer Science</option><option>Information Systems</option><option>Business Administration</option></select></label>
+    <label>Study year<input name="year" type="number" min="1" max="6" placeholder="1–6"></label>
+    <label>GPA · 4-point scale<input name="gpa" type="number" min="0" max="4" step="0.01" placeholder="e.g. 3.50"></label>
+    <label>Training type<select name="training_kind"><option value="">Unknown</option><option value="coop">Co-op</option><option value="summer">Summer internship</option></select></label>
+    <label>Required months<input name="required_months" type="number" min="1" max="12" placeholder="e.g. 6"></label>
+    <label>Available from<input name="available_from" type="date"></label>
+    </div><p id="detailsError" role="alert"></p><button class="primary" type="submit">Save session details</button></form></dialog>
+</body>
+</html>

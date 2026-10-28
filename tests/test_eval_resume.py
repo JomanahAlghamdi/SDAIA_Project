@@ -34,7 +34,7 @@ async def test_resume_retains_behavioral_failures_and_retries_only_interruption(
     out = next(tmp_path.iterdir())
     manifest = json.loads((out / "manifest.json").read_text())
     assert manifest["rows"] == 2 and len(manifest["provider_interruptions"]) == 1
-    assert manifest["effective_limits"]["max_total_tokens"] == 24000
+    assert manifest["effective_limits"]["max_total_tokens"] == 32000
     tasks = suite.load_tasks(args.tasks)
     with pytest.raises(ValueError, match="matching"):
         suite.resume_state(out, args.config, 1, tasks, manifest["task_file_sha256"], "different-model")

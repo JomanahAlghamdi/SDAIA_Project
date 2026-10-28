@@ -1,0 +1,8 @@
+{"time": 1793144036.9558995, "event": "run_start", "config": "B", "profile_id": "S001", "history_kept": 0, "history_removed": 0}
+{"time": 1793144036.9561005, "event": "request_budget", "spent_tokens": 0, "prompt_reservation": 8220, "reservation_basis": "full_utf8_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793144040.1072114, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2162, "completion_tokens": 33, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 8220, "finish_reason": "tool_calls", "reasoning_tokens": 0}
+{"time": 1793144040.107373, "event": "tool_call", "tool": "check_eligibility", "arguments": {"opportunity_id": "OP007"}, "transport": "local"}
+{"time": 1793144040.107441, "event": "tool_result", "tool": "check_eligibility", "result": {"opportunity_id": "OP007", "status": "ineligible", "passed": ["major", "year", "training_kind", "required_months", "available_from", "gpa"], "failures": ["opportunity_closed"], "missing": [], "notice": "Preliminary match to synthetic published requirements; not employer acceptance."}}
+{"time": 1793144040.1076658, "event": "request_budget", "spent_tokens": 2195, "prompt_reservation": 3300, "reservation_basis": "measured_prefix_plus_new_bytes", "max_output_tokens": 900, "total_limit": 24000}
+{"time": 1793144043.3289063, "event": "model_usage", "model": "nvidia/nemotron-3.5-lightning:free", "prompt_tokens": 2282, "completion_tokens": 38, "cost_usd": 0.0, "cost_source": "provider", "input_token_upper_bound": 8846, "finish_reason": "stop", "reasoning_tokens": 0}
+{"time": 1793144043.329062, "event": "run_end", "stopped": "completed", "requests": 2, "tool_calls": 1, "prompt_tokens": 4444, "completion_tokens": 71, "cost_usd": 0.0}

@@ -9,7 +9,7 @@ Authority: [capstone requirements](https://github.com/SDAIAAcademy/agentic-ai/bl
 | Multi-step agent, ≥3 tools | Agent loop; four strict tools | Local tool/loop contracts pass; previous live traces are historical; fresh live evidence pending |
 | ≥1 MCP tool | Search/details over separate stdio MCP process | Real SDK integration tests and live traces |
 | Context file | `prompts/system.md`; one B instruction in `prompts/config_b.txt` | Loaded in each request; hashed in the manifest |
-| Memory/retrieval | Empty normal session, last search, six complete conversation pairs, catalog retrieval; optional academic facts for eligibility only | Local follow-up/history integration plus three planned live multi-turn tasks |
+| Memory/retrieval | Empty normal session, last search, six complete conversation pairs, catalog retrieval; optional academic facts for eligibility only | Local follow-up/history integration plus four live multi-turn tasks |
 | Compaction/context budget | Old complete pairs removed; tool-result cap; measured-prefix reservation with byte fallback | Metered regression, between-step history compaction, overshoot-before-write tests; live rerun pending |
 | Permissions and approved write | Host-only one-use content-bound consent; recheck before SQLite commit | Local approval tests; current live approval cases pending; approval unit tests |
 | Step/cost budgets | 8 model calls / 20 tools per request; token and cost checks; verified-free provider | Actual usage records and local budget tests; no paid fallback |

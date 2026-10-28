@@ -72,10 +72,10 @@ class OpenRouter:
         if self.model not in available:
             raise ProviderError("Configured model is not currently listed as a concrete free tool-calling model. Re-select explicitly; no paid fallback.")
         self.metadata = available[self.model]
-        # Preserve the short visible-output budget for narrow tool tasks.
-        reasoning = self.metadata.get("reasoning", {}) or {}
-        self.reasoning_options = ({"enabled": False} if "reasoning" in self.metadata.get("supported_parameters", [])
-                                  and not reasoning.get("mandatory", False) else None)
+        # Reasoning-off regressed real tool use and follow-up retrieval in the
+        # preserved pilot. Leave space for reasoning AND the visible JSON answer.
+        self.reasoning_options = ({"enabled": True, "max_tokens": 1024}
+                                  if "reasoning" in self.metadata.get("supported_parameters", []) else None)
         self.client = httpx.AsyncClient(timeout=httpx.Timeout(60, connect=15), follow_redirects=False)
         return self
 

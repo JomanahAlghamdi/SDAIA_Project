@@ -91,3 +91,16 @@ def test_completed_suite_requires_unique_trials_and_actual_transcripts(tmp_path,
         with (tmp_path / f"eval_{config}.csv").open("w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=list(rows[0])); writer.writeheader(); writer.writerows(rows)
     assert valid_completed_run(tmp_path, manifest, tasks, SOURCE) is (defect is None)
+
+
+@pytest.mark.parametrize('defect', [None, 'no_llm', 'stale_html', 'missing_approval', 'failed_turn'])
+def test_browser_evidence_requires_live_current_source_and_actions(defect):
+    from scripts.readiness import web_evidence, WEB_CHECKS
+    source={**SOURCE,'web/index.html':'html-fixture'}
+    report={'status':'complete','llm_used':True,'hashes':dict(source),
+            'checks':{k:True for k in WEB_CHECKS},'turns':[{'metrics':{'stopped':'completed'}} for _ in range(6)]}
+    if defect=='no_llm':report['llm_used']=False
+    elif defect=='stale_html':report['hashes']['web/index.html']='old-html'
+    elif defect=='missing_approval':report['checks'].pop('explicit_approval_save')
+    elif defect=='failed_turn':report['turns'][0]['metrics']['stopped']='provider_error'
+    assert web_evidence(report,source) is (defect is None)

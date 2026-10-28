@@ -1,5 +1,10 @@
 # Run Internship Finder on Windows
 
+## HTML interface (current)
+
+After configuring `.env`, run `uv run python app.py web --as-of 2026-10-27` and open http://127.0.0.1:8000. Keep the terminal open. Type your question in English. Academic details are optional; a separate approval card controls local draft saving. The evaluator supplies their own key in `.env`. The key is never embedded in HTML/JavaScript or committed. This new interface is undergoing live browser/A-B verification; consult the final readiness report before submitting.
+
+
 The current interface is English. Start by typing a normal English message. No profile or form is needed. Use fictional details for this synthetic coursework demo.
 
 This revision still needs fresh live A/B and security evidence. Local tests and previous-version scores do not establish current submission readiness.

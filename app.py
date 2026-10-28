@@ -186,11 +186,18 @@ async def main():
         if command == "ask":
             p.add_argument("prompt")
     sub.add_parser("models")
+    web = sub.add_parser("web", help="Open the local HTML chat interface")
+    web.add_argument("--port", type=int, default=8000)
+    web.add_argument("--config", choices=["A", "B"], default="B")
+    web.add_argument("--as-of", help="Explicit synthetic catalog date")
     demo_parser = sub.add_parser("demo")
     demo_parser.add_argument("--interactive", action="store_true", help="Ask a real human for the scripted demo's approval")
     sub.add_parser("doctor")
     args = parser.parse_args()
-    if args.command == "models":
+    if args.command == "web":
+        from finder.web import serve
+        await serve(args)
+    elif args.command == "models":
         for model in await free_tool_models():
             print(model["id"])
     elif args.command == "demo":

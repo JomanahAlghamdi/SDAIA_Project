@@ -28,8 +28,8 @@ async def test_provider_payload_and_usage():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("mandatory,expected", [(False, {"enabled": False}), (True, None)])
-async def test_optional_reasoning_control_preserves_mandatory_models(monkeypatch, mandatory, expected):
+@pytest.mark.parametrize("mandatory,expected", [(False, {"enabled": True, "max_tokens": 1024}), (True, {"enabled": True, "max_tokens": 1024})])
+async def test_reasoning_control_keeps_room_for_tool_use(monkeypatch, mandatory, expected):
     async def metadata():
         return [{"id": "test/model:free", "supported_parameters": ["tools", "reasoning"],
                  "reasoning": {"mandatory": mandatory}}]

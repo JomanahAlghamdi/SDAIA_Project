@@ -19,3 +19,5 @@ One agent selects tools. The host binds identity, enforces four schemas and owns
 Each request can complete, ask for missing information, stop on a budget, fail on a provider error, or return a permission/eligibility denial. No graph or multi-agent coordinator is needed for this bounded task. SQLite stores drafts, not the conversation; session memory is in-process.
 
 Normal chat begins at `You:` without a profile or form. The model obtains search preferences from the message and follow-up context. Field AI does not establish a major. Academic forms are optional advanced eligibility/draft inputs and never a prerequisite for browsing.
+
+The final JSON keeps browsing candidates in `answer`; `opportunity_ids` is an eligible shortlist, not an index of every mentioned ID. The host independently rejects unknown or ineligible shortlist entries and permits at most one model repair inside the original budgets. It does not silently edit the answer. This safeguard checks the structured shortlist; prose still requires evaluation and human review.

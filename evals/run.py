@@ -46,11 +46,17 @@ def hashes():
              ROOT / "pyproject.toml", ROOT / "app.py", ROOT / "mcp_server.py"]
     for directory in ("finder", "evals", "scripts", "tests"):
         paths += sorted((ROOT / directory).glob("*.py"))
+    paths += sorted(p for p in (ROOT / "web").rglob("*") if p.is_file())
     return {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
 
 
 async def evaluate(args):
     tasks = load_tasks(args.tasks)
+    selected = getattr(args, "task", None)
+    if selected:
+        if set(selected) - {t["id"] for t in tasks}:
+            raise ValueError("Unknown task ID in pilot selection")
+        tasks = [t for t in tasks if t["id"] in selected]
     args.out.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
     rows = []
@@ -145,7 +151,7 @@ async def evaluate(args):
     write_manifest()
     summarize(rows, out, args.trials)
     print("Actual live results:", out)
-    return 0
+    return 2 if getattr(args, "require_pass", False) and any(not r["passed"] for r in rows) else 0
 
 
 def resume_state(out, configs, trials, tasks, task_digest, model):
@@ -221,6 +227,8 @@ def main():
     parser.add_argument("--trials", type=int, default=1)
     parser.add_argument("--out", type=Path, default=ROOT / "results/live")
     parser.add_argument("--resume", type=Path, help="Resume an incomplete v2 run only with identical source, tasks and model")
+    parser.add_argument("--task", nargs="+", help="Explicit pilot subset; never qualifies as the full submission suite")
+    parser.add_argument("--require-pass", action="store_true", help="Fail a pilot when any behavioral assertion fails")
     args = parser.parse_args()
     if args.trials < 1 or len(set(args.config)) != len(args.config):
         parser.error("Trials must be positive and configurations unique")

@@ -21,10 +21,10 @@ class BudgetExceeded(RuntimeError):
 class Limits:
     max_steps: int = 8
     max_tool_calls: int = 20
-    max_total_tokens: int = 24000
+    max_total_tokens: int = 32000
     max_cost_usd: float = 0.05
     max_context_bound: int = 16000
-    max_output_tokens: int = 900
+    max_output_tokens: int = 3072
     max_tool_result_chars: int = 4000
     max_history_messages: int = 12
 
@@ -42,7 +42,7 @@ class Limits:
     def environment(cls):
         obj = cls(max_steps=int(os.getenv("IF_MAX_STEPS", "8")),
                   max_tool_calls=int(os.getenv("IF_MAX_TOOL_CALLS", "20")),
-                  max_total_tokens=int(os.getenv("IF_MAX_REQUEST_TOKENS", "24000")),
+                  max_total_tokens=int(os.getenv("IF_MAX_REQUEST_TOKENS", "32000")),
                   max_cost_usd=float(os.getenv("IF_MAX_COST_USD", "0.05")))
         if min(obj.max_steps, obj.max_tool_calls, obj.max_total_tokens, obj.max_cost_usd) <= 0:
             raise ValueError("All runtime budgets must be positive")
@@ -99,17 +99,22 @@ class Run:
 
 
 class Agent:
-    def __init__(self, harness: Harness, provider, config="B", limits: Limits | None = None):
+    def __init__(self, harness: Harness, provider, config="B", limits: Limits | None = None, interface="cli"):
         if config not in {"A", "B"}:
             raise ValueError("Config must be A or B")
         self.harness, self.provider, self.config = harness, provider, config
         self.limits = limits or Limits.environment()
+        self.interface = interface
         self.history: list[dict] = []
 
     def system(self):
         spec = (ROOT / "prompts/system.md").read_text(encoding="utf-8")
         if self.config == "B":
             spec += "\n" + (ROOT / "prompts/config_b.txt").read_text(encoding="utf-8")
+        if self.interface == "web":
+            spec += ("\nThe user is in the browser interface. When a requested personal check or draft needs academic facts, "
+                     "refer to the Academic details button. Never suggest /details or /set terminal commands. "
+                     "The host displays a separate approval card with Approve and Decline buttons.")
         state = {"student": self.harness.student.model_dump(mode="json"),
                  "as_of": self.harness.today().isoformat(),
                  "last_search_filters": self.harness.last_search}

@@ -18,6 +18,16 @@ from evals.security import verified_live_defence  # noqa: E402
 EVIDENCE_REVIEW_FILES = {"scripts/readiness.py", "tests/test_readiness.py"}
 CORE_DEMO_TASKS = {"chat-ai-riyadh-no-profile", "chat-followup-city-no-profile", "chat-requirements-no-profile",
                    "approved-save", "denied-save", "duplicate-save", "injected-description", "forged-approval"}
+WEB_CHECKS = {"browse_without_profile", "published_requirements", "city_followup", "decline_no_save",
+              "explicit_approval_save", "duplicate_prevented", "one_actual_draft", "no_browser_errors"}
+
+
+def web_evidence(report, current):
+    return bool(report.get("status") == "complete" and report.get("llm_used") is True
+                and experiment_source_matches(report.get("hashes"), current)
+                and all(report.get("checks", {}).get(k) is True for k in WEB_CHECKS)
+                and len(report.get("turns", [])) >= 6
+                and all(t.get("metrics", {}).get("stopped") == "completed" for t in report["turns"]))
 
 
 def core_demo_passes(path):
@@ -130,6 +140,9 @@ def main():
     security = security_evidence(reports["live"], reports["replay"], current)
     working_demo_runs = [path for path in complete if core_demo_passes(ROOT / path)]
     analysis_done = "PENDING_LIVE_EVALUATION" not in (ROOT / "docs/error_analysis.md").read_text(encoding="utf-8")
+    web_path = ROOT / "results/web_live/report.json"
+    web_report = json.loads(web_path.read_text()) if web_path.exists() else {}
+    web_ok = web_evidence(web_report, current)
     report = {
         "local_contracts": {"passed": local_ok, "test_count": local_count, "evidence": "results/local/tests.xml"},
         "tools_and_mcp": "implemented; see real MCP integration tests and doctor output",
@@ -140,11 +153,12 @@ def main():
         "default_demo": {"verified_runs": working_demo_runs, "verified": bool(working_demo_runs),
                          "required_tasks": sorted(CORE_DEMO_TASKS)},
         "security_evidence": security,
+        "html_browser_demo": {"verified": web_ok, "evidence": "results/web_live/report.json"},
         "root_cause_analysis": {"pending_marker_removed": analysis_done, "human_review_required": True},
         "source_binding": {"excluded_read_only_review_files": sorted(EVIDENCE_REVIEW_FILES),
                            "note": "All runtime, prompts, tools, data, graders, evaluation runners and dependency hashes must match. Original full manifests remain unchanged. Local tests require exact current hashes."},
         "presentation": "excluded by project owner's cohort instructions; still present in published rubric",
-        "final_submission_ready": bool(local_ok and working_demo_runs and security["requirements_met"] and analysis_done),
+        "final_submission_ready": bool(local_ok and working_demo_runs and security["requirements_met"] and web_ok and analysis_done),
         "note": "Technical evidence checklist, not a guarantee of passing. Manually review actual scores, analysis, model rationale and cohort submission rules. Live guard causality is reported independently; it is not inferred from a failed injection."
     }
     (ROOT / "results/requirements_status.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
