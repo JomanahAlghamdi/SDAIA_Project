@@ -88,6 +88,6 @@ uv run python app.py chat --config B --as-of 2026-10-27
 
 ## Evaluation and key cleanup
 
-Routine use requires only a local `.env`. Running the manual GitHub live evaluation requires the evaluator's own repository Actions secret `OPENROUTER_API_KEY`. This secret is separate from local `.env`; its value is never printed. The project owner's temporary evaluation secret is removed after final validation. Local contract CI and review of committed evidence work without it.
+Routine use requires only a local `.env`. Running the manual GitHub live evaluation requires the evaluator's own repository Actions secret `OPENROUTER_API_KEY`. This secret is separate from local `.env`; its value is never printed. Removal of the project owner's temporary evaluation secret is still pending verified access to repository settings; it has not been claimed complete. Local contract CI and review of committed evidence work without it.
 
 Only `.env.example` is submitted. If handing over an untracked folder manually, remove `.env` first; a GitHub-generated ZIP contains tracked files only. Remove/revoke your temporary key when you no longer need it. Keep the empty variable names and provider configuration so another evaluator can use their own key.

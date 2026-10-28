@@ -1,0 +1,9 @@
+........................................................................ [ 53%]
+..............................................................           [100%]
+=============================== warnings summary ===============================
+tests/test_web.py:5
+  /tmp/sdaia-clean-audit-s8f1bml6/tests/test_web.py:5: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+134 passed, 1 warning in 14.88s

@@ -1,0 +1,13 @@
+{
+  "catalog_records": 30,
+  "mcp_tools": [
+    "search_opportunities",
+    "get_opportunity_details"
+  ],
+  "mcp_protocol": "2025-11-25",
+  "mcp_search_ok": true,
+  "key_present": false,
+  "model_configured": false,
+  "max_request_tokens": 32000,
+  "budget_method": "measured_prefix_plus_new_bytes"
+}

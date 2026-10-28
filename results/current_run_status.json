@@ -57,5 +57,12 @@
   "repository_public_verified": true,
   "temporary_actions_key_cleanup": "pending_authenticated_settings_access_after_final_CI",
   "slides": "Excluded by owner cohort instructions; still listed in published rubric",
-  "note": "Measured technical evidence, not a perfect-prose, general reliability or grade guarantee. Original behavioral failures are retained."
+  "note": "Measured technical evidence, not a perfect-prose, general reliability or grade guarantee. Original behavioral failures are retained.",
+  "rubric_audit": {
+    "review": "docs/RUBRIC_AUDIT.md",
+    "evidence": "results/audit/2026-10-28/review.json",
+    "full_marks_verified": false,
+    "slides_exemption_reconfirmed_by_owner": "2026-10-28",
+    "note": "technical_submission_evidence_ready refers only to the implemented evidence checklist, not every strongest-evidence rubric item."
+  }
 }

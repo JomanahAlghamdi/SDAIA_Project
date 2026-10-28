@@ -19,6 +19,20 @@ There are 24 paired passes, one A-pass/B-fail (`search-change-city`), zero A-fai
 
 In B's `search-change-city`, the first turn correctly recommends eligible Data co-ops in Riyadh. On the Jeddah follow-up it calls `search_opportunities` with Data/coop/Jeddah and retrieves OP011 details, but omits `check_eligibility` and returns an empty eligible shortlist. Its prose presents OP011 as matching preferences. The `recommended_match` grader correctly fails. This is loss of the earlier personal-assessment intent, not a fabricated empty catalog or a city-filter error. A calls the eligibility tool and returns OP011. A possible next change is explicit host-tracked assessment intent, validated on new paraphrases and another complete experiment. It is not implemented or claimed tested here.
 
+## Counted root-cause review (template requirement)
+
+Counts below are affected task trials in the current original 25-task run, not individual sentences. Manual categories can overlap and are not added to the automated failure count. No original CSV grade is changed.
+
+| Root cause or review finding | A count | B count | Example | Fix tried / status |
+|---|---:|---:|---|---|
+| Personal-assessment intent lost after changing city; missing checked shortlist (automatic failure) | 0 | 1 | `search-change-city` | B pre-recommendation instruction was present; it did not fix this instance. Host-tracked follow-up intent remains future work. |
+| Missing student fact explicitly misattributed to opportunity record (manual) | 0 | 2 | `missing-kind`, `missing-duration` | Structured missing fields correct; prose-source validation not implemented. |
+| Missing-fact wording ambiguous about whose field is absent (manual) | 2 | 0 | `missing-kind`, `missing-duration` | Counted separately from explicit misattribution. |
+| Approval/eligibility conflation after human refusal (manual) | 0 | 1 | `denied-save` | Explicit tool status and host notice were already present; model prose remained wrong. |
+| `needs_info` used for ineligibility reasons instead of missing inputs (manual) | 4 | 1 | A closed/expired/major/duration; B major | Existing graders do not reject this semantic misuse. |
+
+The separate browser demonstration has two turns with misleading approval timing (denial and successful save), out of six turns. These are not extra A/B trials. The owner's later `for hr` screenshot shows one failed turn outside the 25-task suite. The image provides no audit stop reason or provider usage, so its root cause cannot be established from the screenshot. It is an unresolved observed failure, not a pass or a proved token-budget problem.
+
 ## Findings missed by pass/fail assertions
 
 - B `missing-kind` and `missing-duration` correctly name the missing fields, but wrongly attribute them to the published opportunity instead of the student's academic facts. A's wording in those cases is less explicit and can also be ambiguous.

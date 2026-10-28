@@ -8,6 +8,8 @@ An English-only conversational AI assistant that starts with a message such as *
 **Interface:** Simple English HTML chat at `http://127.0.0.1:8000`, with optional terminal mode.
 **Revision status:** HTML chat verified with a real browser and model: 8/8 browser checks, 134 local tests, A=25/25 and B=24/25 live tasks. All final responses were reviewed; remaining model wording and one B follow-up failure are documented. See [current status](results/current_run_status.json) and [requirement review](docs/requirements.md).
 
+**Rubric audit (28 October):** the technical evidence gate passes, but this is not full-mark certification. The [official-criteria audit](docs/RUBRIC_AUDIT.md) records the live-security evidence limitation, missing screen-recorded backup, observed HR failure and instructor-confirmed slide exemption. A fresh isolated checkout also passed all 134 tests.
+
 Start here: [Windows setup and walkthrough](START_HERE.md). The repository is public; the evaluator supplies their own OpenRouter API key in a local `.env` file. No key is included in source, HTML or JavaScript. [Repository](https://github.com/JomanahAlghamdi/SDAIA_Project) · [CI](https://github.com/JomanahAlghamdi/SDAIA_Project/actions/workflows/checks.yml).
 
 ## Problem

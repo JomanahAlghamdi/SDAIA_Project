@@ -2,7 +2,7 @@
 
 Sources: [official capstone requirements](https://github.com/SDAIAAcademy/agentic-ai/blob/main/labs/capstone/README.md) and [README template](https://github.com/SDAIAAcademy/agentic-ai/blob/main/labs/capstone/TEMPLATE_README.md). Track 2: Your harness. The owner also requested a simple HTML interface, public repository, and evaluator-owned API key.
 
-Final machine-checked status is in [`results/requirements_status.json`](../results/requirements_status.json). Current live metrics and exact run references are in [`results/current_run_status.json`](../results/current_run_status.json). Historical scores never qualify as evidence for changed runtime, prompts, tools, data, graders or HTML files.
+The [rubric audit](RUBRIC_AUDIT.md) distinguishes implemented minimums from the strongest evidence described in the Day 5 scoring guide. The owner reconfirmed the instructor's slide exemption on 28 October 2026. Machine-checked technical status is in [`results/requirements_status.json`](../results/requirements_status.json). Current live metrics and exact run references are in [`results/current_run_status.json`](../results/current_run_status.json). Historical scores never qualify as evidence for changed runtime, prompts, tools, data, graders or HTML files.
 
 | Requirement | Implementation | Evidence |
 |---|---|---|
@@ -17,13 +17,14 @@ Final machine-checked status is in [`results/requirements_status.json`](../resul
 | Two configurations | Same model/runtime/data; B adds focused pre-recommendation eligibility verification | Complete current-source 25×2 experiment required |
 | Error analysis | Transcript review, failed assertions, bidirectional A/B flips and historical regressions | `docs/error_analysis.md`; failures retained rather than rerun for a better score |
 | Security note and trifecta | Optional private academic context, untrusted descriptions, model API egress | `SECURITY.md` |
-| Attack and defence | OP030 injection; isolated live observation plus forced-action replay | Live model behavior reported separately from actual code-guard enforcement |
+| Attack and defence | OP030 injection; isolated live observation plus forced-action replay | Guard enforcement verified; the stronger successful-before/blocked-after live injection demonstration is not established |
 | Simple HTML UI (owner/cohort request) | Responsive English chat, suggestions, optional academic panel, explicit approval card | `web/`, `finder/web.py`, real browser screenshots/report and HTTP integration tests |
 | Ordinary English conversation | Direct message; no profile required to browse | Exact AI/Riyadh request, requirements follow-up and city change |
 | Public repository | `JomanahAlghamdi/SDAIA_Project`, visibility verified public | GitHub repository metadata |
 | Evaluator supplies own key | Local `.env` read by Python; only blank `.env.example` submitted | No key sent to HTML/JavaScript; no tracked `.env` or detected key pattern in git history |
 | Delete temporary test key last | Remove owner's GitHub Actions secret after validation; keep blank template | Cleanup status recorded separately; never claim deletion without confirmation |
-| README/code/tasks/CSVs | Public repository and GitHub-generated ZIP; locked `uv` environment | README, run guide, `uv.lock`, current evidence and clean Windows/Linux CI |
+| README/code/tasks/CSVs | Public repository and GitHub-generated ZIP; locked `uv` environment | README, run guide, `uv.lock`, evidence, Windows/Linux CI and separate clean-source/new-environment check |
+| Recorded demo backup (Day 5 preparation) | Five real browser screenshots and actual transcripts exist | A screen-recorded video is not present; screenshots are not relabeled as video |
 | Slides/presentation | Excluded by the owner's prior cohort instructions | Still listed in the published rubric; exemption is not represented as a rubric change |
 
 ## Interpretation
