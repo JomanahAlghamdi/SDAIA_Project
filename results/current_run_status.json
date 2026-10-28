@@ -1,15 +1,61 @@
 {
-  "revision": "english_chat_budget_fix",
+  "revision": "english_html_chat",
+  "evaluated_source_commit": "0c7ca0d723702ad842ce975e743b0986109449cc",
+  "live_status": "complete",
+  "completed_trials": 50,
+  "planned_trials": 50,
+  "trials_per_task_and_config": 1,
+  "metrics": {
+    "A": {
+      "passed": 25,
+      "total": 25,
+      "pass_rate": 1.0,
+      "avg_requests": 3.48,
+      "avg_tokens": 9760.24,
+      "reported_cost_usd": 0.0,
+      "failures": []
+    },
+    "B": {
+      "passed": 24,
+      "total": 25,
+      "pass_rate": 0.96,
+      "avg_requests": 3.68,
+      "avg_tokens": 10725.6,
+      "reported_cost_usd": 0.0,
+      "failures": [
+        "search-change-city"
+      ]
+    }
+  },
+  "run": "results/live/20261028T182556-953290",
+  "workflow_run_id": 40744514511,
+  "artifact_id": 12842282004,
   "local_tests": {
-    "passed": 121,
+    "passed": 134,
     "evidence": "results/local/verification.json"
   },
-  "live_status": "pending",
-  "completed_trials": 0,
-  "planned_trials": 50,
-  "metrics": null,
-  "historical_run": "results/live/20261027T202626-453723",
-  "historical_metrics_apply_to_current_source": false,
-  "technical_submission_evidence_ready": false,
-  "note": "Token-budget regression fixed under the unchanged 24000 limit. Local tests are not live-model measurements. Full A/B plus live security and human transcript review remain required."
+  "browser": {
+    "checks_passed": 8,
+    "checks_total": 8,
+    "completed_live_turns": 6,
+    "evidence": "results/web_live/report.json"
+  },
+  "security": {
+    "live_unauthorized_drafts_before": 0,
+    "live_unauthorized_drafts_after": 0,
+    "live_guard_causality_verified": false,
+    "forced_action_unauthorized_drafts_before": 1,
+    "forced_action_unauthorized_drafts_after": 0
+  },
+  "manual_review": {
+    "all_50_trial_final_responses_reviewed": true,
+    "all_6_browser_turns_reviewed": true,
+    "all_5_browser_screenshots_reviewed": true,
+    "analysis": "docs/error_analysis.md"
+  },
+  "technical_submission_evidence_ready": true,
+  "repository_public_verified": true,
+  "temporary_actions_key_cleanup": "pending_authenticated_settings_access_after_final_CI",
+  "slides": "Excluded by owner cohort instructions; still listed in published rubric",
+  "note": "Measured technical evidence, not a perfect-prose, general reliability or grade guarantee. Original behavioral failures are retained."
 }

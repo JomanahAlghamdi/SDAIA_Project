@@ -1,95 +1,93 @@
-# Run Internship Finder on Windows
+# Open the English HTML assistant on Windows
 
-## HTML interface (current)
+## 1. Get the project
 
-After configuring `.env`, run `uv run python app.py web --as-of 2026-10-27` and open http://127.0.0.1:8000. Keep the terminal open. Type your question in English. Academic details are optional; a separate approval card controls local draft saving. The evaluator supplies their own key in `.env`. The key is never embedded in HTML/JavaScript or committed. This new interface is undergoing live browser/A-B verification; consult the final readiness report before submitting.
+Download the public repository using **Code → Download ZIP**, extract it, and open the inner folder containing `app.py`, `pyproject.toml` and `uv.lock`. Open PowerShell in that folder.
 
-
-The current interface is English. Start by typing a normal English message. No profile or form is needed. Use fictional details for this synthetic coursework demo.
-
-This revision still needs fresh live A/B and security evidence. Local tests and previous-version scores do not establish current submission readiness.
-
-## 1. Open the project folder
-
-Extract the ZIP. Open the inner folder containing `app.py`, `pyproject.toml` and `uv.lock`. Right-click empty space and choose **Open in Terminal**.
-
-## 2. Install once
-
-Run each line separately:
+## 2. Install dependencies
 
 ```powershell
-uv --version
 uv python install 3.12
-uv sync --locked
+uv sync --python 3.12 --locked
 ```
 
-If `uv` is not installed, follow the [official installation instructions](https://docs.astral.sh/uv/getting-started/installation/). A warning about standalone Python not being on PATH does not stop `uv run python`.
+If `uv` is missing, use the [official installation instructions](https://docs.astral.sh/uv/getting-started/installation/).
 
-## 3. Configure the key locally
+## 3. Supply your own API key
 
-If `.env` is already configured, keep it. Otherwise:
+The evaluator supplies their own OpenRouter key. The repository contains only an empty `.env.example` template. If `.env` does not already exist:
 
 ```powershell
 Copy-Item .env.example .env
 notepad .env
 ```
 
-Put your own key after `OPENROUTER_API_KEY=`. Leave the configured model value in place. Save and close. Never send this file/key to anyone or upload it to GitHub.
+Enter the key after `OPENROUTER_API_KEY=` and save. Keep the configured free model. The current default total request budget is `IF_MAX_REQUEST_TOKENS=32000`; update that value if reusing an older `.env`. Do not upload `.env` or put the key in HTML/JavaScript. If a key is already configured locally, do not overwrite it with the empty template.
+
+## 4. Start the web interface
 
 ```powershell
-uv run python app.py doctor
+uv run python app.py web --as-of 2026-10-27
 ```
 
-`key_present` and `model_configured` should be `true`. These check configuration presence; the real chat verifies provider access.
+Keep the terminal open, then open **http://127.0.0.1:8000** in your browser.
 
-## 4. Start
+The date flag is the synthetic catalog's reference date, not today's date. All opportunities and employers are fictional. Normal browsing does not ask for a profile or academic form.
 
-```powershell
-uv run python app.py chat --config B --as-of 2026-10-27
-```
+## 5. Try a conversation
 
-At `You:` type:
+Type one message at a time:
 
 ```text
 I need an internship opportunity for AI in Riyadh
-```
-
-The assistant searches the fictional catalog and explains the options. It does not load `S001`, ask you to choose a major/city menu, or assume your major, GPA or year. The date flag is the demo catalog's reference date, not today's date.
-
-## 5. Continue the conversation
-
-```text
-What are the requirements for OP012?
+What are the requirements?
 Are there any in Jeddah?
 ```
 
-You can also ask about dates, duration, remote work or a different field. `/quit` exits; `/reset` starts a new conversation. `/help` lists optional commands. No personal record is needed for these questions.
+You can also click a suggestion. Press Enter to send or Shift+Enter for a line break. **New conversation** creates a fresh anonymous session.
 
-For the separate approved-write course demo, you can run `uv run python app.py demo --interactive`. It uses explicitly fictional fixture data and scripted tool calls, not an LLM. Review its preview and type exactly `YES` to save the temporary local draft or `NO` to decline; nothing is sent to an employer.
+## 6. Demonstrate an approved write (optional)
 
-To explore formal eligibility during real chat, `/details` optionally collects fictional academic facts; `/facts` shows them. This is needed only for the formal eligibility/draft demo, not browsing. A valid fixture example is AI, year 4, GPA 3.6/4, coop, 6 months, available 2027-01-01. After entering it, ask `Check OP001.` Then, if desired, `Prepare a local draft for OP001.` The separate exact-preview approval is still required.
+This demonstrates the course's human approval requirement. It is not required to browse.
 
-## 6. Evaluation credentials on GitHub
+Click **Academic details** and use fictional values:
 
-A local `.env` is only on your computer. GitHub Actions needs its own encrypted repository secret:
+| Field | Demo value |
+|---|---|
+| Major | Artificial Intelligence |
+| Study year | 4 |
+| GPA | 3.6 (out of 4) |
+| Training type | Co-op |
+| Required months | 6 |
+| Available from | 2027-01-01 |
 
-1. Open repository **Settings → Secrets and variables → Actions**.
-2. Create or update the repository secret named `OPENROUTER_API_KEY`.
-3. Paste your key into the **Secret** field and save it. Do not put it in a repository file or workflow input.
-4. Run **Live model evaluation (manual)** on the revision's branch, leaving `resume` empty for a new run. If a run stopped only because the secret was missing, its failed job can be rerun after adding the secret.
-5. Inspect/download its evidence artifact. Commit the current results, review errors, and run the strict readiness check before submission.
+Click **Save session details**, then ask:
 
-## 7. Final checks
+```text
+Prepare a local draft for OP001 and show me the approval preview.
+```
+
+Review the separate approval card. **Decline** saves nothing. Ask again in a new turn, then **Approve & save locally** to save one draft. Asking for the same draft again returns the existing one. Nothing is submitted to an employer.
+
+## 7. Stop and check
+
+Press Ctrl+C in the terminal to stop the server. Restarting creates new browser sessions; local demo draft databases remain under ignored `runtime/` and are not part of submission.
 
 ```powershell
 uv run python scripts/verify_local.py
 uv run python scripts/readiness.py --require-live
 ```
 
-The second command deliberately fails until evidence matches the current code, tasks and prompts. Old bilingual results must not be presented as measurements of the new English chat.
+The first command checks local contracts and real MCP without a key. The second checks committed current-source live evidence, including the browser and approval demonstration. A completed workflow alone is not a passing evaluation.
 
-## Token-budget fix and diagnosis
+Terminal chat is also available:
 
-Use the current download; the previous English revision could stop on a simple AI/Riyadh request. The repaired reservation calculation works with the existing `IF_MAX_REQUEST_TOKENS=24000`; you do not need to raise it or replace your key. `doctor` now reports `budget_method: measured_prefix_plus_new_bytes` so you can identify the updated copy. If a request stops, the CLI shows its reason, request count and measured usage. Local draft outcomes are printed even if a later model answer fails.
+```powershell
+uv run python app.py chat --config B --as-of 2026-10-27
+```
 
-The eval manifest records effective budgets; a resume refuses changed budgets. The ordinary-chat cases run first, including the user's exact message and a natural requirements follow-up. Finishing a run alone does not certify a working chatbot: default B's core demo cases must pass.
+## Evaluation and key cleanup
+
+Routine use requires only a local `.env`. Running the manual GitHub live evaluation requires the evaluator's own repository Actions secret `OPENROUTER_API_KEY`. This secret is separate from local `.env`; its value is never printed. The project owner's temporary evaluation secret is removed after final validation. Local contract CI and review of committed evidence work without it.
+
+Only `.env.example` is submitted. If handing over an untracked folder manually, remove `.env` first; a GitHub-generated ZIP contains tracked files only. Remove/revoke your temporary key when you no longer need it. Keep the empty variable names and provider configuration so another evaluator can use their own key.

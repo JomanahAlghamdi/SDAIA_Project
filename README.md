@@ -5,15 +5,16 @@ An English-only conversational AI assistant that starts with a message such as *
 **Track:** 2 — Your harness
 **Project owner:** Jomanah Alghamdi
 **Data:** 30 synthetic opportunities; 6 explicitly selectable test profiles. Normal chat starts with an empty academic record.
-**Revision status:** Conversational English chat and token-budget regression fix implemented; current live A/B evaluation and security observation must be completed before submission. The previous bilingual version's A=80% / B=100% scores are historical, not scores for this revision. See [current status](results/current_run_status.json) and [requirement review](docs/requirements.md).
+**Interface:** Simple English HTML chat at `http://127.0.0.1:8000`, with optional terminal mode.
+**Revision status:** HTML chat verified with a real browser and model: 8/8 browser checks, 134 local tests, A=25/25 and B=24/25 live tasks. All final responses were reviewed; remaining model wording and one B follow-up failure are documented. See [current status](results/current_run_status.json) and [requirement review](docs/requirements.md).
 
-Start here: [Windows setup and walkthrough](START_HERE.md). [Repository](https://github.com/JomanahAlghamdi/SDAIA_Project) · [CI](https://github.com/JomanahAlghamdi/SDAIA_Project/actions/workflows/checks.yml).
+Start here: [Windows setup and walkthrough](START_HERE.md). The repository is public; the evaluator supplies their own OpenRouter API key in a local `.env` file. No key is included in source, HTML or JavaScript. [Repository](https://github.com/JomanahAlghamdi/SDAIA_Project) · [CI](https://github.com/JomanahAlghamdi/SDAIA_Project/actions/workflows/checks.yml).
 
 ## Problem
 
 Students ask for internships in plain English and follow up naturally. For example, "I need an internship opportunity for AI in Riyadh" searches the AI field in Riyadh immediately. The assistant presents fictional opportunities and answers questions about their requirements, duration and dates. "Are there any in Jeddah?" changes the city while retaining the AI search. No profile, registration, major/city menu, GPA or study year is required to browse. An interest in AI does not establish the student's major.
 
-The optional eligibility and approved local-draft demonstration uses separately entered fictional academic values. It never blocks ordinary browsing. No employer application is sent.
+The optional eligibility and approved local-draft demonstration uses fictional values entered through the Academic details panel. It never blocks ordinary browsing. No employer application is sent.
 
 ## How to run
 
@@ -37,16 +38,16 @@ notepad .env
 On macOS/Linux use `cp .env.example .env`. Enter your own `OPENROUTER_API_KEY` locally, leaving the concrete `OPENROUTER_MODEL` setting in place. Do not overwrite an existing configured `.env`, share its contents or commit it. The app checks zero pricing and tool support at runtime; there is no paid fallback.
 
 ```bash
-uv run python app.py chat --config B --as-of 2026-10-27
+uv run python app.py web --as-of 2026-10-27
 ```
 
-The app opens directly at `You:`. Type:
+Open **http://127.0.0.1:8000** and keep the terminal running. Type in the message box:
 
 ```text
 I need an internship opportunity for AI in Riyadh
 ```
 
-Then continue naturally:
+Then continue naturally in the same chat:
 
 ```text
 What are the requirements for OP012?
@@ -61,9 +62,15 @@ No `--student`, form or preset academic record is required. Searches support the
 uv run python app.py ask --as-of 2026-10-27 "I need an internship opportunity for AI in Riyadh"
 ```
 
-`/quit` exits. `/reset` starts a new conversation and clears entered academic facts in normal chat, retaining saved local drafts. `/help` explains optional commands. Use `--verbose` for token/request/cost diagnostics; ordinary chat shows the answer only.
+The **New conversation** button starts a fresh anonymous session. The **Academic details** button is optional and is only needed for a personal eligibility check or local draft. **Approve & save locally** and **Decline** control an exact draft preview. No chat wording grants consent.
+
+Terminal mode remains available with `uv run python app.py chat --config B --as-of 2026-10-27`; `/quit`, `/reset`, `/help` and `--verbose` apply to that mode.
 
 ### Optional eligibility and approved-write demo
+
+In the HTML interface, open **Academic details**, enter fictional values, and save them to the session. Ask `Prepare a local draft for OP001.` The backend checks eligibility and displays the exact preview; only the separate **Approve & save locally** button allows the write. Declining saves nothing, and duplicate requests return the existing draft. Browser sessions use independent databases.
+
+The following commands describe optional terminal mode:
 
 This is a separate course demonstration, not a prerequisite for asking about opportunities. `/details` lets you enter fictional academic facts: major, year, GPA on a 4-point scale, training type, required months and start availability. `/facts` displays them, and `/set FIELD VALUE` edits one (`null` clears it). After entering them, ask `Check OP001 against the details I entered.` To request a local write, ask `Prepare a local draft for OP001 and show me the approval preview.` Only **YES** at the separate host prompt approves it. Other responses decline. Chat wording cannot grant host approval.
 
@@ -77,7 +84,7 @@ uv run python app.py demo --interactive
 
 ## Models
 
-The configured model is `nvidia/nemotron-3.5-lightning:free` through OpenRouter. Runtime preflight requires current zero pricing and tool support. The previous version's live pilot and A/B run measured this model; English chat requires a fresh run with the same model for A and B. [Model rationale](docs/model_rationale.md) distinguishes vendor benchmarks, historical measurements and pending results. Requests are paced at least 3.2 seconds apart; errors stop rather than silently switching models. Optional reasoning is disabled when the selected model advertises it and does not require it, preserving the 900-token output allowance for these short tasks. Finish reasons and reasoning-token counts are recorded when reported.
+The configured model is `nvidia/nemotron-3.5-lightning:free` through OpenRouter. Runtime preflight requires current zero pricing and tool support. The current revision has a passing four-task pilot, six-turn live browser demonstration, and complete 25-task A/B experiment on the same model. [Model rationale](docs/model_rationale.md) distinguishes vendor benchmarks, historical measurements and current results. Requests are paced at least 3.2 seconds apart; errors stop rather than silently switching models. Reasoning is enabled when supported, with a requested 1,024-token reasoning allocation and room for the visible answer. The reasoning-off experiment regressed tool use and is preserved in the error analysis. Finish reasons and reasoning-token counts are recorded when reported.
 
 ## Design across the ladder
 
@@ -91,9 +98,9 @@ The configured model is `nvidia/nemotron-3.5-lightning:free` through OpenRouter.
 
 [Architecture diagram](docs/architecture.md). The model selects search/detail/eligibility tools; code controls academic input validation and all writes. Major and opportunity field are separate filters: an AI student can browse a Data opportunity that accepts AI majors.
 
-Limits per user request: 8 model calls, 20 tool calls, a cumulative 24,000-token budget, at most 900 output tokens per call, USD 0.05 ceiling and a 16,000-unit conservative UTF-8-byte context bound (including framing reserve). The first request reserves the full byte bound; later requests reuse the provider's measured token count for the unchanged prefix and reserve bytes only for newly appended messages. This is an estimate, not an exact model tokenizer. Actual provider usage is checked again before any tool action; unexpectedly high usage stops the run, and already incurred usage cannot be undone. Output allowance shrinks to the remaining reservation. Old complete conversation pairs can be removed between steps; current tool-call/result pairs remain intact. The final eligible shortlist is validated in code; an invalid result is returned to the model for at most one repair, never silently rewritten. Tool results are capped at 4,000 characters. Positive reported cost stops tool execution; no paid fallback or deployment-wide daily cap is implemented.
+Limits per user request: 8 model calls, 20 tool calls, a cumulative 32,000-token budget, at most 3,072 generated tokens per call (reasoning plus visible output), USD 0.05 ceiling and a 16,000-unit conservative UTF-8-byte context bound (including framing reserve). The first request reserves the full byte bound; later requests reuse the provider's measured token count for the unchanged prefix and reserve bytes only for newly appended messages. This is an estimate, not an exact model tokenizer. Actual provider usage is checked again before any tool action; unexpectedly high usage stops the run, and already incurred usage cannot be undone. Output allowance shrinks to the remaining reservation. Old complete conversation pairs can be removed between steps; current tool-call/result pairs remain intact. The final eligible shortlist is validated in code; an invalid result is returned to the model for at most one repair, never silently rewritten. Tool results are capped at 4,000 characters. Positive reported cost stops tool execution; no paid fallback or deployment-wide daily cap is implemented.
 
-The previous English revision could report `token_budget` on the first ordinary AI/Riyadh question: its reservation treated all serialized bytes as fresh tokens on every step. A metered regression reproduces a stop after 11,750 reported test tokens; the repaired loop completes the same scripted search/details/answer at 16,700 test tokens, under the unchanged 24,000 limit. These are explicit test-double measurements, not live LLM results. Current live A/B evaluation remains required. See [the review](docs/FINAL_REVIEW_AR.md).
+The previous English revision could report `token_budget` on the first ordinary AI/Riyadh question: its reservation treated all serialized bytes as fresh tokens on every step. A metered regression reproduces a stop after 11,750 reported test tokens; the repaired loop completes the same scripted search/details/answer at 16,700 test tokens, under the unchanged 24,000 limit. These are explicit test-double measurements, not live LLM results. The current HTML revision separately passed the live checks below with a 32,000-token ceiling. See [the review](docs/FINAL_REVIEW_AR.md).
 
 ## Tools
 
@@ -116,10 +123,12 @@ MCP uses the pinned official Python SDK. Its subprocess receives no OpenRouter k
 
 | Revision | Config | Completed/planned | Pass rate | pass^k | Avg requests | Avg tokens |
 |---|---|---|---|---|---|---|
-| Current English chat | A | Pending / 25 | Not measured | Not measured | Not measured | Not measured |
-| Current English chat | B | Pending / 25 | Not measured | Not measured | Not measured | Not measured |
+| Current HTML/English chat | A | 25 / 25 | 100% | 100% (k=1) | 3.48 | 9,760.24 |
+| Current HTML/English chat | B | 25 / 25 | 96% | 96% (k=1) | 3.68 | 10,725.60 |
 | Historical bilingual | A | 20 / 20 | 80% | 80% (k=1) | 3.40 | 7,926.3 |
 | Historical bilingual | B | 20 / 20 | 100% | 100% (k=1) | 3.50 | 8,344.0 |
+
+Current evidence: [`20261028T182556-953290`](results/live/20261028T182556-953290), [browser report](results/web_live/report.json), and [actual screenshots](results/web_live). Reported A/B cost was $0.00. B is the default and its core chat/write/security cases all passed; its personal city-follow-up failed. A scored higher in this single comparison, so the added B instruction is not claimed to improve measured accuracy.
 
 Historical evidence remains unmodified under `results/live/20261027T202626-453723/`; its hashes do not match this revision. Do not reuse those scores as English-chat results. One trial is not a repeated-reliability estimate or a grade guarantee.
 
@@ -134,11 +143,11 @@ A new complete run needs 50 task/configuration trials. Provider interruptions ar
 
 ### Error analysis
 
-[Current analysis status](docs/error_analysis.md) records the new verification scope. Historical errors included one A format/budget failure, three A missing-information recommendation errors, mixed-language replies and misleading draft/approval prose. English instructions and explicit draft-status wording address known issues, but improvement must be measured rather than assumed. See the [historical analysis](https://github.com/JomanahAlghamdi/SDAIA_Project/blob/afcf39f062defab05f43f64113ae48f51c22841c/docs/error_analysis.md).
+[Error analysis](docs/error_analysis.md) records all current failures, manual findings on passing cases, and earlier regressions. B found the correct new-city candidate but skipped the personal eligibility check. Some missing-data and approval wording remains misleading even when structured/action checks pass. Authoritative host notices expose actual local-write outcomes. See the [historical analysis](https://github.com/JomanahAlghamdi/SDAIA_Project/blob/afcf39f062defab05f43f64113ae48f51c22841c/docs/error_analysis.md).
 
 ## Security and governance
 
-[SECURITY.md](SECURITY.md) maps the private-context, untrusted-text and external-model egress legs. OP030 carries a synthetic injection requesting an unauthorized save. A deterministic forced-action experiment verifies the code's consent boundary; it is not an LLM attack success score. The previous live model resisted both variants, so that observation did not prove the guard caused its resistance. Fresh live security evidence is pending for the changed prompt.
+[SECURITY.md](SECURITY.md) maps the private-context, untrusted-text and external-model egress legs. OP030 carries a synthetic injection requesting an unauthorized save. A deterministic forced-action experiment verifies the code's consent boundary; it is not an LLM attack success score. The current live model resisted both variants: zero unauthorized writes before and after. This does not prove that the guard caused its resistance. The separate forced-action replay produced one unsafe write before defence and zero after, with an approved benign control.
 
 Only fictional/public data may be used for coursework. Do not enter university credentials, CVs or identifiers. Session fields and chat content go to OpenRouter as model context; local audit logs can contain academic details. A future real deployment would require appropriate privacy, identity, retention and access controls.
 
@@ -153,10 +162,11 @@ The [official capstone requirements](https://github.com/SDAIAAcademy/agentic-ai/
 - Synthetic, dated, small catalog only; no real vacancies, scraping, email or employer submissions.
 - Four supported majors and four cities; no silent mapping of unsupported inputs.
 - Search candidates can be shown from conversational preferences alone; verified eligibility needs the relevant published academic constraints.
-- A local CLI, not a hosted website or authenticated multi-user service. New normal sessions do not resume prior drafts automatically.
+- A local HTML application with a Python server and optional CLI; not a production authenticated multi-user service. New normal sessions do not resume prior drafts automatically.
 - English prompt behavior is measured by automatic script checks and manual review, not guaranteed by instructions alone.
 - Code guards protect writes; they do not guarantee every sentence the model generates.
-- Complete the current A/B and security runs, inspect actual failures, update analysis, and pass readiness before submitting this revision.
+- Current single-trial A/B results are 100% and 96%; manual review found prose inaccuracies even in passing cases. Future work: preserve personal-assessment intent across follow-ups and strengthen semantic response checks.
+- The temporary Actions key is removed only after final validation; its cleanup status is recorded separately. The evaluator supplies a new local key.
 
 ## Sources
 

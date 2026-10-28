@@ -1,23 +1,32 @@
-> Historical model observations below are from the previous bilingual revision. The current conversational English source needs a fresh A/B run; no current pass rate is claimed. Original analysis is preserved in [history](history/2026-10-27/model_rationale.md).
+# Model choice and measured tradeoffs
 
-# Model selection and external evidence
+The selected concrete model is `nvidia/nemotron-3.5-lightning:free` through OpenRouter. Both A and B use this same model. Before calling it, the adapter retrieves current metadata and requires tool support and zero pricing. It never silently switches to a paid model or to a router alias.
 
-Reviewed 2026-10-27. Runtime verifies current zero pricing and tool support; no paid model or automatic fallback is enabled.
+The choice combines tool availability, English support, public benchmark context and this project's own measured behavior. NVIDIA's [official model card](https://build.nvidia.com/nvidia/nemotron-3.5-lightning-30b-a3b/modelcard) describes a 30B-parameter mixture-of-experts model with 3B active parameters and reports PinchBench 83.43 and IFBench loose 72.88 for the NVFP4 checkpoint. Those vendor results use different tasks and settings; they are not this project's accuracy and do not prove the OpenRouter endpoint is the identical deployment.
 
-The initial candidate was `google/gemma-4-31b-it:free`. Authentication succeeded, but its live requests returned HTTP 429 indicating upstream capacity. An explicit pilot with `google/gemma-4-26b-a4b-it:free` returned the same category. These are availability failures, not measured quality scores.
+The initial Gemma candidates encountered upstream HTTP 429 failures, documented in the [historical rationale](history/2026-10-27/model_rationale.md). They have no comparable project quality score. No cross-benchmark model ranking is claimed.
 
-The selected evaluation model is **`nvidia/nemotron-3.5-lightning:free`**. A real pilot completed the OP001 eligibility task in two model requests, using `check_eligibility`, with 4,040 reported tokens and USD 0 reported cost. That single pilot establishes connectivity and tool use, not suite accuracy.
+## Project observations
 
-NVIDIA's [official model card](https://build.nvidia.com/nvidia/nemotron-3.5-lightning-30b-a3b/modelcard) reports PinchBench 83.43 and IFBench loose 72.88 for its NVFP4 checkpoint. These are vendor benchmarks, with different tasks and settings from this project. The OpenRouter deployment is not assumed to be identical to that checkpoint. Arabic is not in the card's stated supported-language list. The completed project evaluation found mixed-language wording and two English responses to Arabic prompts in B; these limitations remain even though B passed all automatic task assertions.
+| Source revision | Experiment | A | B | Interpretation |
+|---|---|---:|---:|---|
+| Historical bilingual revision | 20 tasks, one trial/config | 16/20 | 20/20 | Historical only; passing assertions missed some misleading prose |
+| `c1ef6099` | First 25-task English review | 17/25 | 19/25 | Token reservation fixed, but browsing/eligibility contracts were confused |
+| `2ca07085` | Reasoning-off experiment | 18/25 | 17/25 | Basic browsing improved; city follow-ups and write workflows regressed |
+| `0c7ca0d7` HTML revision | Four-task pilot, six-turn browser, full 25×2 | 25/25 | 24/25 | One B personal city-follow-up failure; no claim that B outperforms A |
 
-For comparison, Google's [official Gemma 4 page](https://deepmind.google/models/gemma/gemma-4/) reports retail tool-use benchmark τ2-bench scores of 86.4% for 31B Thinking and 85.5% for 26B A4B Thinking. Those results motivated the initial candidates but cannot substitute for this agent's own A/B results.
+Current metrics are in [`results/current_run_status.json`](../results/current_run_status.json); actual final-response review is in [error analysis](error_analysis.md). Behavioral failures remain in the CSVs and are never silently retried for a better score.
 
-Both configurations in a completed comparison must use the same concrete model. Interrupted attempts and explicit model changes are recorded separately. No cross-benchmark ranking or improvement claim is made.
+## Reasoning and budget choice
 
-[OpenRouter's published free-tier limits](https://openrouter.ai/pricing) are 20 requests/minute and 50/day, rising to 1,000/day after at least USD 10 in credits have been purchased. Creating another key does not bypass account limits. The provider spaces requests by at least 3.2 seconds; a 429 still stops the run. No credits are purchased by this project.
+The reasoning-off experiment reduced usage but produced announcements instead of tool calls, unsupported “no opportunities” answers, and refusals to use available draft tools. NVIDIA documents this class of [reasoning-off tool-calling limitation](https://github.com/NVIDIA-AI-Blueprints/nemotron-voice-agent/blob/main/docs/how-to/configure-llm.md).
 
-Use `--resume results/live/<run>` after quota/capacity recovers to finish an incomplete v2 run. Source/task hashes, model, trial count and configurations must match. Completed behavioral failures are retained, not retried to improve scores. Infrastructure-interrupted trials are logged separately and retried from fresh session/database state, with new trace names. Resume attempts may span days, which adds a timing/provider-availability confound that must be reported.
+The current adapter requests reasoning when supported, with a 1,024-token allocation and a 3,072-token combined generated-output cap. The per-turn total ceiling is 32,000 tokens, alongside 8 model calls, 20 tool calls and the context/result caps. These are finite limits, not unlimited retries. Actual provider usage is enforced before tool execution, and response repair is limited to one attempt. [OpenRouter explains](https://openrouter.ai/docs/guides/best-practices/reasoning-tokens) that reasoning can consume the output budget; finish reason and reasoning-token counts are recorded when supplied. Requesting a reasoning allocation is not presented as an exact measurement of the upstream implementation.
 
-## Measured project results
+The HTML and CLI use the same agent/provider; the interface adds no model proxy, API-key input in JavaScript, or extra hosted service. The owner temporarily uses their key for evaluation; the evaluator supplies their own `.env` afterward.
 
-The complete 20-task A/B suite produced A 16/20 and B 20/20 on the automatic graders, one trial per task/configuration. Average requests were 3.40 / 3.50 and average tokens 7,926.3 / 8,344.0. Reported model cost was zero. See `results/live/20261027T202626-453723/summary.md` and `docs/error_analysis.md`, including incorrect prose in some passing tasks. These measurements justify selecting B for this prototype, not a general model ranking or a claim of perfect Arabic.
+## Reproducibility limits
+
+Temperature is fixed at zero, but hosted outputs are not guaranteed deterministic. One trial per task does not establish repeated reliability or statistical significance. Effective model names, request counts, tokens, cost, source fingerprints and budget settings are recorded.
+
+Requests are paced at least 3.2 seconds apart. A provider error stops the run. Only infrastructure-interrupted trials in an explicitly resumed, matching-source experiment may be attempted again; completed behavioral failures are retained. A complete run cannot be resumed for a better score. No credits are purchased and no deployment-wide daily spending cap is claimed.

@@ -1,0 +1,46 @@
+{
+  "reviewed_source_commit": "0c7ca0d723702ad842ce975e743b0986109449cc",
+  "live_run_url": "https://github.com/JomanahAlghamdi/SDAIA_Project/actions/runs/40744514511",
+  "artifact_id": 12842282004,
+  "evaluated_at_utc": "2026-10-28",
+  "repository": "JomanahAlghamdi/SDAIA_Project",
+  "visibility": "public",
+  "metrics": {
+    "A": {
+      "passed": 25,
+      "total": 25,
+      "pass_rate": 1.0,
+      "avg_requests": 3.48,
+      "avg_tokens": 9760.24,
+      "reported_cost_usd": 0.0,
+      "failures": []
+    },
+    "B": {
+      "passed": 24,
+      "total": 25,
+      "pass_rate": 0.96,
+      "avg_requests": 3.68,
+      "avg_tokens": 10725.6,
+      "reported_cost_usd": 0.0,
+      "failures": [
+        "search-change-city"
+      ]
+    }
+  },
+  "manual_findings": [
+    "B search-change-city retrieves OP011 but omits personal eligibility check and verified shortlist.",
+    "B missing-kind and missing-duration misattribute missing student fields to published opportunity data.",
+    "B denied-save says no prompt was shown and calls an eligible opportunity ineligible; actual host denial saved zero.",
+    "Browser denial and approved-save replies contain stale approval wording; host card, consent trace, notice and SQLite result are correct.",
+    "Some A constraint replies use needs_info for failure reasons; current graders do not reject that semantic imprecision."
+  ],
+  "images_reviewed": [
+    "welcome.png",
+    "conversation.png",
+    "approval-false.png",
+    "approval-true.png",
+    "saved.png"
+  ],
+  "final_ci": "See checks workflow on the evidence commit; not the earlier source-only submission-evidence failure.",
+  "key_cleanup": "pending_authenticated_settings_access_after_final_CI"
+}

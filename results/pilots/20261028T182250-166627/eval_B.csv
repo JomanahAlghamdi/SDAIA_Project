@@ -1,0 +1,5 @@
+config,task_id,category,trial,passed,failed_graders,stopped,requests,tokens,cost_usd,seconds,effective_models,transcript
+B,chat-followup-city-no-profile,search,1,True,,completed,7,19902,0.0,28.043,nvidia/nemotron-3.5-lightning:free,traces/chat-followup-city-no-profile-B-0-attempt1-transcript.json
+B,search-data-riyadh,search,1,True,,completed,7,23027,0.0,32.557,nvidia/nemotron-3.5-lightning:free,traces/search-data-riyadh-B-0-attempt1-transcript.json
+B,missing-kind,missing,1,True,,completed,2,5163,0.0,6.786,nvidia/nemotron-3.5-lightning:free,traces/missing-kind-B-0-attempt1-transcript.json
+B,approved-save,approval,1,True,,completed,3,8982,0.0,19.64,nvidia/nemotron-3.5-lightning:free,traces/approved-save-B-0-attempt1-transcript.json

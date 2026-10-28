@@ -1,44 +1,37 @@
-# Course requirement → implementation → evidence
+# Requirement → implementation → evidence
 
-Authority: [capstone requirements](https://github.com/SDAIAAcademy/agentic-ai/blob/main/labs/capstone/README.md), [README template](https://github.com/SDAIAAcademy/agentic-ai/blob/main/labs/capstone/TEMPLATE_README.md), [Day 5 rubric](https://sdaiaacademy.github.io/agentic-ai/slides/day5.html). Track 2.
+Sources: [official capstone requirements](https://github.com/SDAIAAcademy/agentic-ai/blob/main/labs/capstone/README.md) and [README template](https://github.com/SDAIAAcademy/agentic-ai/blob/main/labs/capstone/TEMPLATE_README.md). Track 2: Your harness. The owner also requested a simple HTML interface, public repository, and evaluator-owned API key.
 
-**Current revision: conversational English chat; live evidence pending.** No profile or form is required for search and opportunity questions. The 25-task suite includes the user's exact AI/Riyadh request, a city follow-up and requirements without academic inputs. The previous 20-task bilingual A/B results are historical and do not measure this source. The strict readiness checker intentionally rejects them for current submission.
+Final machine-checked status is in [`results/requirements_status.json`](../results/requirements_status.json). Current live metrics and exact run references are in [`results/current_run_status.json`](../results/current_run_status.json). Historical scores never qualify as evidence for changed runtime, prompts, tools, data, graders or HTML files.
 
-| Requirement | Implementation | Actual evidence |
+| Requirement | Implementation | Evidence |
 |---|---|---|
-| Multi-step agent, ≥3 tools | Agent loop; four strict tools | Local tool/loop contracts pass; previous live traces are historical; fresh live evidence pending |
-| ≥1 MCP tool | Search/details over separate stdio MCP process | Real SDK integration tests and live traces |
-| Context file | `prompts/system.md`; one B instruction in `prompts/config_b.txt` | Loaded in each request; hashed in the manifest |
-| Memory/retrieval | Empty normal session, last search, six complete conversation pairs, catalog retrieval; optional academic facts for eligibility only | Local follow-up/history integration plus four live multi-turn tasks |
-| Compaction/context budget | Old complete pairs removed; tool-result cap; measured-prefix reservation with byte fallback | Metered regression, between-step history compaction, overshoot-before-write tests; live rerun pending |
-| Permissions and approved write | Host-only one-use content-bound consent; recheck before SQLite commit | Local approval tests; current live approval cases pending; approval unit tests |
-| Step/cost budgets | 8 model calls / 20 tools per request; token and cost checks; verified-free provider | Actual usage records and local budget tests; no paid fallback |
-| ≥15 automatically graded tasks | 25 English tasks across 5 categories; course-standard fields and executable graders | `tasks.jsonl`, `evals/graders.py`; 50 current trials pending; previous 40 trials preserved as history |
-| Two configurations evaluated | A base prompt; B one verification instruction; same model/runtime/data | New source-matched A/B run pending; do not reuse historical scores |
-| Error analysis | Causal transcript review, paired flips and manually found grader gaps | `docs/error_analysis.md` marks the current analysis pending and links the previous analysis |
-| Security note/trifecta | Private academic context, untrusted catalog text, model API egress | `SECURITY.md`, synthetic data and scoped tools |
-| Attack and defence | Live injection observation plus independent forced-action authorization experiment | Current forced-action replay verifies consent; current live injection observation pending |
-| Logs/operability | Usage, tool calls/results, approvals, stop reasons, bounded errors, explicit resume | Complete traces, retained quota interruption, current local test report |
-| README/reproducibility | Problem, run instructions, ladder, tools, results, security, limits, diagram | README, `uv.lock`, Arabic walkthrough, scripted approval/denial demonstration |
-| Synthetic/public data only | 30 fake opportunities and 6 fake profiles | Validated JSON fixtures; no real employer submission |
-| No secrets in repository | `.env`/runtime excluded; key not forwarded to MCP | Repository secret scan; temporary local credential deleted after use |
-| Repository/ZIP | Public GitHub repository; Download ZIP supported | Code and tasks current; historical CSVs/traces retained; fresh live evidence pending |
-| Slides/presentation | Excluded per project owner's cohort instructions | Still present in the published rubric; no claim of changed grading weights |
+| Multi-step agent with ≥3 tools | Four tools: search, details, eligibility, local draft | Actual model/tool traces; local contract tests |
+| ≥1 tool over MCP | Search and details in a separate SDK stdio process | MCP handshake/integration tests and live tool traces |
+| Context file | `prompts/system.md` and one additional B instruction | Loaded by the agent; source fingerprints in manifests |
+| Memory/retrieval | Recent complete conversation pairs, previous filters, retrieved catalog records | Four multi-turn tasks, web city follow-up, context tests |
+| Compaction/budget rule | Retire old complete pairs; cap tool output; measured-prefix reservation and actual-usage check | Nonzero-token regression and overshoot-before-action tests |
+| Permissions and human-approved write | Exact preview; host-owned single-use consent; eligibility recheck | Approval/denial/duplicate tests and actual browser buttons |
+| Step/cost limits | 8 model calls, 20 tools, 32,000 total tokens, 3,072 output tokens/call, $0.05 ceiling; reject positive reported cost | Effective limits, usage logs, cost guard tests; verified-free model |
+| ≥15 automatically graded tasks | 25 English tasks, five categories, executable course graders | `tasks.jsonl`, A/B CSVs, transcripts and SQL assertions |
+| Two configurations | Same model/runtime/data; B adds focused pre-recommendation eligibility verification | Complete current-source 25×2 experiment required |
+| Error analysis | Transcript review, failed assertions, bidirectional A/B flips and historical regressions | `docs/error_analysis.md`; failures retained rather than rerun for a better score |
+| Security note and trifecta | Optional private academic context, untrusted descriptions, model API egress | `SECURITY.md` |
+| Attack and defence | OP030 injection; isolated live observation plus forced-action replay | Live model behavior reported separately from actual code-guard enforcement |
+| Simple HTML UI (owner/cohort request) | Responsive English chat, suggestions, optional academic panel, explicit approval card | `web/`, `finder/web.py`, real browser screenshots/report and HTTP integration tests |
+| Ordinary English conversation | Direct message; no profile required to browse | Exact AI/Riyadh request, requirements follow-up and city change |
+| Public repository | `JomanahAlghamdi/SDAIA_Project`, visibility verified public | GitHub repository metadata |
+| Evaluator supplies own key | Local `.env` read by Python; only blank `.env.example` submitted | No key sent to HTML/JavaScript; no tracked `.env` or detected key pattern in git history |
+| Delete temporary test key last | Remove owner's GitHub Actions secret after validation; keep blank template | Cleanup status recorded separately; never claim deletion without confirmation |
+| README/code/tasks/CSVs | Public repository and GitHub-generated ZIP; locked `uv` environment | README, run guide, `uv.lock`, current evidence and clean Windows/Linux CI |
+| Slides/presentation | Excluded by the owner's prior cohort instructions | Still listed in the published rubric; exemption is not represented as a rubric change |
 
-## Evidence interpretation
+## Interpretation
 
-The course does not require manufacturing a successful live model compromise. This project reports live resistance to the attempted injection and separately demonstrates the code guard stopping the requested malicious action. Live guard causality for that specific injection remains **unverified**, not silently inferred. Broader robustness needs more attacks and trials.
+The live browser check must complete the exact browsing flow, optional academic entry, denied write, approved write and duplicate prevention with a real model. A successful page load or scripted response alone does not satisfy that check.
 
-The historical evaluation predates the current runtime, tasks and evidence checks. New manifests record effective limits and model metadata; default configuration B must pass the core chat and approval/security demo cases before readiness can be true. Only `scripts/readiness.py` and `tests/test_readiness.py` are excluded from experiment-source compatibility; runtime, prompt, data, dependency, grader and evaluation-runner hashes must match. Original full manifests are preserved. Local verification requires exact current full hashes.
+The readiness check additionally requires the default B chat and consent/security demonstration cases to pass, a complete A/B experiment on one effective model, current security evidence and completed error analysis. Local verification must match exact current hashes. The two read-only evidence review files are excluded only from experiment-source comparison; all actual experiment inputs and web assets remain bound.
 
-## Published rubric
+A resisted injection is not automatically evidence that the authorization guard caused resistance. The forced-action replay isolates that boundary; the live observation reports what the model actually attempted.
 
-| Criterion | Weight |
-|---|---:|
-| Working system/live demonstration | 25% |
-| Context/harness engineering | 25% |
-| Evaluation/error analysis | 20% |
-| Security/governance/operability | 20% |
-| Presentation/reproducibility | 10% |
-
-Run `uv run python scripts/readiness.py --require-live`, and manually review actual results and cohort submission rules. The historical score of 100% on B's small automatic suite does not mean all its prose is correct or that academic acceptance is guaranteed.
+This is a technical evidence review, not a guarantee of a grade or of behavior on every possible question. One trial per task is not a repeated-reliability estimate. The data remain fictional and no employer submission exists.

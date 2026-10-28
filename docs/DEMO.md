@@ -1,5 +1,12 @@
 # Demonstrate Internship Finder
 
+## HTML interface (recommended)
+
+Run `uv run python app.py web --as-of 2026-10-27`, open http://127.0.0.1:8000, and use the English chat box. Ask for AI in Riyadh, ask for requirements, then ask about Jeddah. For the separate approved-write demonstration, use **Academic details** and the **Approve & save locally / Decline** card; see [START_HERE.md](../START_HERE.md). Actual browser evidence is in `results/web_live/` when marked complete.
+
+The sections below also document the optional terminal demonstration.
+
+
 Use configuration B and the fixed synthetic catalog date. All opportunities, employers and fixture students are fictional. The ordinary assistant opens directly at `You:`.
 
 ## Ordinary conversation
