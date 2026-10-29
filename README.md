@@ -2,6 +2,13 @@
 
 An English-only conversational AI assistant that starts with a message such as **"I need an internship opportunity for AI in Riyadh"**, retrieves synthetic co-op and summer opportunities, explains their requirements, and saves a local draft only after an eligibility check and explicit human approval.
 
+## Course attribution
+
+This capstone project was developed for **Agentic AI Systems Engineering** at **SDAIA Academy**.
+
+- **Course website:** https://sdaiaacademy.github.io/agentic-ai/
+- **Official course GitHub repository:** https://github.com/SDAIAAcademy/agentic-ai
+
 **Track:** 2 — Your harness
 **Project owner:** Jomanah Alghamdi
 **Data:** 30 synthetic opportunities; 6 explicitly selectable test profiles. Normal chat starts with an empty academic record.
